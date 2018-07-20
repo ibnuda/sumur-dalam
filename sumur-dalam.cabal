@@ -1,0 +1,100 @@
+name:                sumur-dalam
+version:             0.1.0.0
+-- synopsis:
+-- description:
+homepage:            https://sumur-dalam.siskam.link
+license:             MIT
+license-file:        LICENSE
+author:              Ibnu D. Aji
+maintainer:          iaji@siskam.link
+copyright:           2018 Ibnu D. Aji
+category:            Web
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  ghc-options:         -Wall
+  exposed-modules:     Types
+                     , Conf
+                     , Model
+                     , Model.Grouping
+                     , Util
+                     , Pertanyaan.Bantuan
+                     , Pertanyaan.TentangPengguna
+                     , Pertanyaan.TentangSistem
+                     , Pertanyaan.TentangMinum
+                     , Pertanyaan.TentangTagihan
+                     , Bisnis.ValidasiData
+                     , Bisnis.Otoritas
+                     , Bisnis.PembukuanAir
+                     , Penangan.Pintu
+                     , Penangan.Air
+                     , Api.Otorisasi
+                     , Api.AdministrasiSistem
+                     , Api.Petugas
+                     , SumurApi
+  build-depends:       base >= 4.7 && < 5
+                     , protolude
+                     , aeson >= 1.2
+                     , aeson-casing >= 0.1
+                     , bcrypt >= 0.0
+                     , bytestring >= 0.10
+                     , esqueleto
+                     , jose
+                     , monad-logger >= 0.3
+                     , persistent >= 2.8
+                     , persistent-postgresql >= 2.8
+                     , persistent-template >= 2.5
+                     , random >= 1.1
+                     , servant-auth
+                     , servant-auth-client
+                     , servant-auth-server
+                     , servant-server >= 0.13
+                     , text
+                     , transformers
+                     , time >= 1.8
+                     , wai >= 3.2
+                     , warp >= 3.2
+  default-language:    Haskell2010
+  default-extensions:  OverloadedStrings
+                     , NoImplicitPrelude
+  ghc-options:         -Wall
+
+executable benih
+  hs-source-dirs:      benih
+  main-is:             Main.hs
+  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , sumur-dalam
+                     , protolude
+                     , monad-logger
+                     , persistent-postgresql
+  default-language:    Haskell2010
+  default-extensions:  OverloadedStrings, NoImplicitPrelude
+
+
+executable sumur
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , sumur-dalam
+                     , protolude
+  default-language:    Haskell2010
+  default-extensions:  OverloadedStrings, NoImplicitPrelude
+
+test-suite real-world-conduit-test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+  build-depends:       base
+                     , sumur-dalam
+                     , protolude
+  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+  default-extensions:  OverloadedStrings, NoImplicitPrelude
+source-repository head
+  type:     git
+  location: https://gitlab.com/ibnuda/sumur-dalam
