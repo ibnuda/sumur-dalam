@@ -29,6 +29,7 @@ library
                      , Bisnis.ValidasiData
                      , Bisnis.Otoritas
                      , Bisnis.PembukuanAir
+                     , Bisnis.PembukuanPelanggan
                      , Penangan.Pintu
                      , Penangan.Air
                      , Api.Otorisasi

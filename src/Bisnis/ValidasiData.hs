@@ -73,7 +73,7 @@ meteranBulanIniHarusIsi
   => Text -- ^ Nomor meteran.
   -> Integer -- ^ Tahun pencatatan.
   -> Int -- ^ Bulan pencatatan.
-  -> m (Entity Meteran)
+  -> m (Entity Meteran, Entity Minum)
 meteranBulanIniHarusIsi nometeran tahun bulan = do
   minum <- runDb $ selectMinumByNomorMeteran nometeran (Just tahun) (Just bulan)
   case minum of

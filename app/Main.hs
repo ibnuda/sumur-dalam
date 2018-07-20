@@ -1,6 +1,6 @@
 module Main where
 
-import           KampungAPI
+import           SumurApi
 import           Protolude
 
 main :: IO ()

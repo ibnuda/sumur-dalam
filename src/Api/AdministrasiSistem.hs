@@ -9,7 +9,6 @@ import           Servant.Auth.Server
 
 import           Conf
 import           Model
-import           Types
 
 type AdministrasiSistemApi =
   "sistem"

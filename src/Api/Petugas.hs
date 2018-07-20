@@ -16,6 +16,13 @@ import Penangan.Air
 type PetugasApi =
   "petugas"
     :> "air"
+    :> Get '[ JSON] [ResponseDaftarPelanggan]
+  :<|> "petugas"
+    :> "air"
+    :> Capture "nomormeteran" Text
+    :> Get '[ JSON] ResponsePenggunaanAir
+  :<|> "petugas"
+    :> "air"
     :> Capture "nomormeteran" Text
     :> ReqBody '[ JSON] RequestCatatAir
     :> Post '[ JSON] ResponsePenggunaanAir
@@ -30,7 +37,9 @@ petugasProxy = Proxy
 
 petugasApi :: MonadIO m => AuthResult Pengguna -> ServerT PetugasApi (PenanganT m)
 petugasApi a =
-  postCatatAirPenangan a
+  getDaftarPelangganPenangan a
+    :<|> getMinumPelangganPenangan a
+    :<|> postCatatAirPenangan a
     :<|> putCatatAirPenangan a
 
 petugasServer :: Konfigurasi -> AuthResult Pengguna -> Server PetugasApi

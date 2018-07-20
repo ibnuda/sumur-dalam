@@ -51,6 +51,16 @@ data ResponsePenggunaanAir = ResponsePenggunaanAir
 instance ToJSON ResponsePenggunaanAir where
   toJSON = genericToJSON omitsnake
 
+data ResponseDaftarPelanggan = ResponseDaftarPelanggan
+  { rdpNamaPelanggan :: Text
+  , rdpNomorTelepon  :: Text
+  , rdpNomorMeteran  :: Text
+  , rdpAlamat        :: Text
+  , rdpSudahCatat    :: Bool
+  } deriving (Generic)
+instance ToJSON ResponseDaftarPelanggan where
+  toJSON = genericToJSON omitsnake
+
 data Gagal
   = GagalMasuk
   | GagalAdminNil { gadminnilPid :: Int64 }

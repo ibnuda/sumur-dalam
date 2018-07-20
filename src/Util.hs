@@ -37,6 +37,12 @@ buatToken pengguna = do
     Left  _ -> throwError GagalMasuk
     Right y -> return . decodeUtf8 . BL.toStrict $ y
 
+untriad :: (t1 -> t2 -> t3 -> t4) -> (t1, t2, t3) -> t4
+untriad f (a, b, c) = f a b c
+
+unquad :: (t1 -> t2 -> t3 -> t4 -> t5) -> (t1, t2, t3, t4) -> t5
+unquad f (a, b, c, d) = f a b c d
+
 -- | "https://github.com/haskell-servant/servant-auth/pull/107/commits/3813a4d979dfbd47b6f9b667dfe163dd4743c141"
 generateSecret :: MonadRandom m => m ByteString
 generateSecret = getRandomBytes 256

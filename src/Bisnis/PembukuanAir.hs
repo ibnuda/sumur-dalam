@@ -6,8 +6,8 @@ import           Protolude
 
 import           Database.Esqueleto
 
-import           Data.Time               (getCurrentTime, toGregorian)
-import           Data.Time.Clock         (utctDay)
+import           Data.Time                 (getCurrentTime, toGregorian)
+import           Data.Time.Clock           (utctDay)
 
 import           Conf
 import           Model
@@ -52,14 +52,20 @@ ubahCatatanAirBulanIni
   -> Int64 -- ^ Sampai.
   -> m (Integer, Int, Int64)
 ubahCatatanAirBulanIni petugas nomormeteran sampai = do
-  Pengguna {..}     <- kewenanganMinimalPengguna petugas Petugas
-  (tahun, bulan, _) <- toGregorian . utctDay <$> liftIO getCurrentTime
-  _                 <- meteranHarusAda nomormeteran
-  (Entity mid _)    <- meteranBulanIniHarusIsi nomormeteran tahun bulan
+  Pengguna {..}       <- kewenanganMinimalPengguna petugas Petugas
+  (tahun, bulan, _)   <- toGregorian . utctDay <$> liftIO getCurrentTime
+  _                   <- meteranHarusAda nomormeteran
+  ((Entity mid _), _) <- meteranBulanIniHarusIsi nomormeteran tahun bulan
   runDb $ updateMinum mid tahun bulan sampai Nothing
   return (tahun, bulan, sampai)
 
-lihatDaftarCatatanAir petugas mtahun mbulan = do
+lihatCatatanAirPelangganBulanIni ::
+     (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)
+  => Pengguna
+  -> Text
+  -> m (Text, Integer, Int, Int64)
+lihatCatatanAirPelangganBulanIni petugas nomormeteran = do
   Pengguna {..} <- kewenanganMinimalPengguna petugas Petugas
-  (tahun, bulan) <- tahunBulanHarusValid mtahun mbulan
-  return ()
+  (tahun, bulan, _) <- toGregorian . utctDay <$> liftIO getCurrentTime
+  (_, Entity _ Minum {..}) <- meteranBulanIniHarusIsi nomormeteran tahun bulan
+  return (nomormeteran, toInteger minumTahun, minumBulan, minumSampai)
