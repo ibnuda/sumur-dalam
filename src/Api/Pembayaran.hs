@@ -26,13 +26,14 @@ type PembayaranApi =
     :> Get '[ JSON] [ResponseDataTagihan]
   :<|> "tagihan"
     :> Capture "nomortelp" Text
-    :> Capture "tagihanid" Int64
-    :> Put '[ JSON] ResponseDataTagihan
+    :> Capture "tahun" Integer
+    :> Capture "bulan" Int
+    :> Get '[ JSON] ResponseDataTagihan
   :<|> "tagihan"
     :> Capture "nomortelp" Text
     :> Capture "tahun" Integer
     :> Capture "bulan" Int
-    :> Get '[ JSON] ResponseDataTagihan
+    :> Put '[ JSON] ResponseDataTagihan
 
 pembayaranProxy :: Proxy PembayaranApi
 pembayaranProxy = Proxy
@@ -42,8 +43,8 @@ pembayaranApi
 pembayaranApi a =
   getDaftarDataTagihanPenangan a
     :<|> getDaftarTagihanPenggunaPenangan a
-    :<|> putBayarTagihanPenangan a
     :<|> getTagihanPenggunaTahunBulanPenangan a
+    :<|> putBayarTagihanPenangan a
 
 pembayaranServer :: Konfigurasi -> AuthResult Pengguna -> Server PembayaranApi
 pembayaranServer c a =

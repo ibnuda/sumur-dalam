@@ -21,6 +21,9 @@ type AdministrasiSistemApi =
     :> Get '[ JSON] NoContent
   :<|> "tarif"
     :> Get '[ JSON] ResponseDataTagihanTarif
+  :<|> "ganti"
+    :> ReqBody '[ JSON] RequestPelangganBaru
+    :> Get '[ JSON] NoContent
 
 administrasiSistemProxy :: Proxy AdministrasiSistemApi
 administrasiSistemProxy = Proxy
@@ -29,7 +32,7 @@ administrasiSistemApi
   :: MonadIO m
   => AuthResult Pengguna
   -> ServerT AdministrasiSistemApi (PenanganT m)
-administrasiSistemApi a = panic "belum dibuat" :<|> getTarifTerbaruPenangan a
+administrasiSistemApi a = panic "belum dibuat" :<|> getTarifTerbaruPenangan a :<|> panic ""
 
 administrasiSistemServer
   :: Konfigurasi -> AuthResult Pengguna -> Server AdministrasiSistemApi

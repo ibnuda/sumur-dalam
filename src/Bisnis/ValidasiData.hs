@@ -136,10 +136,12 @@ tahunBulanLalu t b = do
 
 tagihanAda
   :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m)
-  => Int64
+  => Text
+  -> Int64
+  -> Int
   -> m (Entity Tagihan)
-tagihanAda tid = do
-  tagihan <- runDb $ selectTagihan $ toSqlKey tid
+tagihanAda notelp tahun bulan = do
+  tagihan <- runDb $ selectTagihan notelp tahun bulan
   case tagihan of
-    []  -> throwError $ GagalTagihanNil tid
+    []  -> throwError $ GagalTagihanNil notelp tahun bulan
     x:_ -> return x

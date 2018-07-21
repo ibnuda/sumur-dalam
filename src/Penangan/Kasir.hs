@@ -52,9 +52,10 @@ putBayarTagihanPenangan
   :: MonadIO m
   => AuthResult Pengguna
   -> Text
-  -> Int64
+  -> Integer
+  -> Int
   -> PenanganT m ResponseDataTagihan
-putBayarTagihanPenangan (Authenticated a) notelp tid =
-  unsextuple querytagihanKeResponse <$> bayarTagihan a notelp tid
-putBayarTagihanPenangan _ _ _ =
+putBayarTagihanPenangan (Authenticated a) notelp tahun bulan =
+  unsextuple querytagihanKeResponse <$> bayarTagihan a notelp tahun bulan
+putBayarTagihanPenangan _ _ _ _ =
   throwError $ GagalTakBerwenang "Lihat tagihan pengguna."

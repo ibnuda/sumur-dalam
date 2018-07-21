@@ -45,7 +45,8 @@ bayarTagihan
   :: (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)
   => Pengguna
   -> Text
-  -> Int64
+  -> Integer
+  -> Int
   -> m
        ( Entity Pengguna
        , Entity Meteran
@@ -54,22 +55,21 @@ bayarTagihan
        , Entity Tarif
        , Value Int64
        )
-bayarTagihan admin notelp nomortagihan = do
-  _ <- kewenanganMinimalPengguna admin Admin
-  _ <- tagihanAda nomortagihan
-  h <- utctDay <$> liftIO getCurrentTime
-  let (tini, bini, _) = toGregorian h
+bayarTagihan admin notelp tahun bulan = do
+  _              <- kewenanganMinimalPengguna admin Admin
+  (tini , bini ) <- tahunBulanHarusValid (Just tahun) (Just bulan)
   (tlalu, blalu) <- tahunBulanLalu tini bini
-  t <- runDb $ do
-    updateTagihan         (toSqlKey nomortagihan)        h
+  hariini        <- utctDay <$> liftIO getCurrentTime
+  Entity tid _   <- tagihanAda notelp (fromInteger tini) bini
+  tagihan        <- runDb $ do
+    updateTagihan tid hariini
     selectDaftarTagihanByTahunBulan (Just notelp)
                                     (fromInteger tini)
                                     bini
                                     (fromInteger tlalu)
                                     blalu
-
-  case t of
-    []  -> throwError $ GagalTagihanNil nomortagihan
+  case tagihan of
+    []  -> throwError $ GagalTagihanTahunBulanNil tini bini
     x:_ -> return x
 
 lihatTagihanPengguna

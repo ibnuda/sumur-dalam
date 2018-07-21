@@ -26,12 +26,18 @@ selectTagihan
      , BackendCompatible SqlBackend backend
      , MonadIO m
      )
-  => Key Tagihan
+  => Text
+  -> Int64
+  -> Int
   -> ReaderT backend m [Entity Tagihan]
-selectTagihan tid = do
-  select $ from $ \tagihan -> do
-    where_ $ tagihan ^. TagihanId ==. val tid
-    limit 1
+selectTagihan notelp tahun bulan = do
+  select $ from $ \(pengguna `InnerJoin` meteran `InnerJoin` minum `InnerJoin` tagihan) -> do
+    on $ minum ^. MinumId ==. tagihan ^. TagihanMinumId
+    on $ meteran ^. MeteranId ==. minum ^. MinumMeteranId
+    on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
+    where_ $ pengguna ^. PenggunaNomorTelp ==. val notelp
+    where_ $ minum ^. MinumTahun ==. val tahun
+    where_ $ minum ^. MinumBulan ==. val bulan
     return tagihan
 
 updateTagihan :: MonadIO m => Key Tagihan -> Day -> ReaderT SqlBackend m ()

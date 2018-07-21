@@ -33,6 +33,16 @@ data RequestCatatAir = RequestCatatAir
 instance FromJSON RequestCatatAir where
   parseJSON = genericParseJSON omitsnake
 
+data RequestPelangganBaru = RequestPelangganBaru
+  { rpbNama         :: Text
+  , rpbNomorTelepon :: Text
+  , rpbPassword     :: Text
+  , rpbAlamat       :: Text
+  , rpbNomorMeteran :: Text
+  } deriving (Generic)
+instance FromJSON RequestPelangganBaru where
+  parseJSON = genericParseJSON omitsnake
+
 data ResponseDataPelangganToken = ResponseDataPelangganToken
   { respdptNama   :: Text
   , respdptTelp   :: Text
@@ -123,7 +133,7 @@ data Gagal
   | GagalPenggunaAda Text
   | GagalPenggunaNil Text
   | GagalPenggunaTunaMeteran
-  | GagalTagihanNil Int64
+  | GagalTagihanNil Text Int64 Int
   | GagalTagihanTahunBulanNil Integer Int
   | GagalTakBerwenang Text
   | GagalTambahPelanggan Text Text
@@ -169,9 +179,16 @@ gagalToServantErr (GagalPenggunaAda n) =
   err422 { errBody = encodeRespError ("nomor " <> n <> " sudah dipakai.") }
 gagalToServantErr (GagalPenggunaNil n) =
   err404 { errBody = encodeRespError ("nomor " <> n <> " tidak dipakai.") }
-gagalToServantErr (GagalTagihanNil x) = err404
+gagalToServantErr (GagalTagihanNil x y z) = err404
   { errBody = encodeRespError
-    ("tagihan dengan nomor " <> (pack . show $ x) <> " tidak ada.")
+    (  "pengguna dengan nomor "
+    <> (pack . show $ x)
+    <> " tidak punya tagihan di tahun "
+    <> (pack . show $ y)
+    <> " bulan "
+    <> (pack . show $ z)
+    <> "."
+    )
   }
 gagalToServantErr (GagalTagihanTahunBulanNil x y) = err404
   { errBody = encodeRespError
