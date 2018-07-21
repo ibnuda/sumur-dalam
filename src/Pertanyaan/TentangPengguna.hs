@@ -57,3 +57,18 @@ selectPenggunaMeteranDanCatatMinum tahun bulan = do
           (else_ $ val False)
     orderBy [desc (pengguna ^. PenggunaAlamat)]
     return (pengguna, meteran, something (meteran ^. MeteranId))
+
+selectMeteranPengguna
+  :: ( PersistUniqueRead backend
+     , PersistQueryRead backend
+     , BackendCompatible SqlBackend backend
+     , MonadIO m
+     )
+  => Text
+  -> ReaderT backend m [Entity Meteran]
+selectMeteranPengguna notelp = do
+  select $ from $ \(pengguna `InnerJoin` meteran) -> do
+    on $ meteran ^. MeteranPenggunaId ==. pengguna ^. PenggunaId
+    where_ $ pengguna ^. PenggunaNomorTelp ==. val notelp
+    limit 1
+    return meteran

@@ -48,8 +48,8 @@ untriple f (a, b, c) = f a b c
 unquadruple :: (t1 -> t2 -> t3 -> t4 -> t5) -> (t1, t2, t3, t4) -> t5
 unquadruple f (a, b, c, d) = f a b c d
 
-unsextuple ::
-     (t1 -> t2 -> t3 -> t4 -> t5 -> t6 -> t7) -> (t1, t2, t3, t4, t5, t6) -> t7
+unsextuple
+  :: (t1 -> t2 -> t3 -> t4 -> t5 -> t6 -> t7) -> (t1, t2, t3, t4, t5, t6) -> t7
 unsextuple f (a, b, c, d, e, f') = f a b c d e f'
 
 tarifKeResponse :: Tarif -> ResponseDataTagihanTarif
@@ -89,6 +89,7 @@ querytagihanKeResponse pengguna meteran tagihan minum tarif (Value lalu) =
                       (tarifKeResponse $ entityVal tarif)
                       lalu
                       (minumSampai $ entityVal minum)
+                      (tagihanTanggalBayar $ entityVal tagihan)
 
 -- | "https://github.com/haskell-servant/servant-auth/pull/107/commits/3813a4d979dfbd47b6f9b667dfe163dd4743c141"
 generateSecret :: MonadRandom m => m ByteString

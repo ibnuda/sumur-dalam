@@ -14,9 +14,7 @@ import           Util
 import           Bisnis.LainLain
 
 getTarifTerbaruPenangan
-  :: MonadIO m
-  => AuthResult Pengguna
-  -> PenanganT m ResponseDataTagihanTarif
+  :: MonadIO m => AuthResult Pengguna -> PenanganT m ResponseDataTagihanTarif
 getTarifTerbaruPenangan (Authenticated x) = do
   tarifKeResponse <$> lihatTarifTerbaru x
 getTarifTerbaruPenangan _ = throwError $ GagalTakBerwenang "Tidak boleh lihat."

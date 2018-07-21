@@ -12,9 +12,9 @@ import           Data.Aeson
 import           Data.Aeson.Casing
 import qualified Data.ByteString.Lazy as BL
 import           Data.Text            (pack)
-import           Servant.Server
+import           Data.Time
 
-import           Model.Grouping
+import           Servant.Server
 
 omitsnake :: Options
 omitsnake =
@@ -103,39 +103,36 @@ data ResponseDataTagihan = ResponseDataTagihan
   , rdtTarif         :: ResponseDataTagihanTarif
   , rdtMinumLalu     :: Int64
   , rdtMinumSekarang :: Int64
+  , rdtTanggalBayar  :: Maybe Day
   } deriving (Generic)
 instance ToJSON ResponseDataTagihan where
   toJSON = genericToJSON omitsnake
 
 data Gagal
   = GagalMasuk
-  | GagalAdminNil { gadminnilPid :: Int64 }
-  | GagalBayar { gbayarAlasan :: Text }
-  | GagalCatatAir { gcatatairAlasan       :: Text
-                  , gcatatairNomorMeteran :: Text }
-  | GagalDB { gdbAlasan :: Text
-            , gdbAksi   :: Text }
+  | GagalAdminNil Int64
+  | GagalBayar Text
+  | GagalCatatAir Text Text
+  | GagalDB Text Text
   | GagalDataTidakAda
-  | GagalMeteranAda { gmeteranadaNomor :: Text }
-  | GagalMeteranNil { gmeterannilNomor :: Text }
-  | GagalMinumAda { gminumadaNomor :: Text }
-  | GagalMinumNil { gminumnilNomor :: Text }
+  | GagalMeteranAda Text
+  | GagalMeteranNil Text
+  | GagalMinumAda Text
+  | GagalMinumNil Text
   | GagalPasswordBeda
-  | GagalPenggunaAda { gpenggunaadaTelepon :: Text }
-  | GagalPenggunaNil { gpenggunanilTelepon :: Text }
+  | GagalPenggunaAda Text
+  | GagalPenggunaNil Text
   | GagalPenggunaTunaMeteran
-  | GagalTakBerwenang { gtakwenangSaat :: Text }
-  | GagalTambahPelanggan { gtambahpelAlasan :: Text
-                         , gtambahpelDetail :: Text }
-  | GagalTanggalBelumAda { gtglbTahun :: Integer
-                         , gtglbBulan :: Int }
-  | GagalTanggalTidakValid { gtgltTahun :: Integer
-                           , gtgltBulan :: Int }
+  | GagalTagihanNil Int64
+  | GagalTagihanTahunBulanNil Integer Int
+  | GagalTakBerwenang Text
+  | GagalTambahPelanggan Text Text
+  | GagalTanggalBelumAda Integer Int
+  | GagalTanggalTidakValid Integer Int
   | GagalTanggalTidakAda
   | GagalTarifKosong
-  | GagalUbahAir { gubahairAlasan       :: Text
-                 , gubahairNomorMeteran :: Text }
-  | GagalUpdatePassword { gupdatepassAlasan :: Text }
+  | GagalUbahAir Text Text
+  | GagalUpdatePassword Text
   deriving (Show, Eq)
 
 data RespError = RespError
@@ -172,6 +169,19 @@ gagalToServantErr (GagalPenggunaAda n) =
   err422 { errBody = encodeRespError ("nomor " <> n <> " sudah dipakai.") }
 gagalToServantErr (GagalPenggunaNil n) =
   err404 { errBody = encodeRespError ("nomor " <> n <> " tidak dipakai.") }
+gagalToServantErr (GagalTagihanNil x) = err404
+  { errBody = encodeRespError
+    ("tagihan dengan nomor " <> (pack . show $ x) <> " tidak ada.")
+  }
+gagalToServantErr (GagalTagihanTahunBulanNil x y) = err404
+  { errBody = encodeRespError
+    (  "pelanggan tidak punya tagihan pada tahun "
+    <> (pack . show $ x)
+    <> " bulan "
+    <> (pack . show $ y)
+    <> "."
+    )
+  }
 gagalToServantErr (GagalTakBerwenang saat) =
   err401 { errBody = encodeRespError saat }
 gagalToServantErr (GagalTambahPelanggan a d) =
@@ -202,7 +212,5 @@ gagalToServantErr GagalPenggunaTunaMeteran =
   err404 { errBody = encodeRespError "Ybs tidak punya meteran." }
 gagalToServantErr GagalTarifKosong =
   err404 { errBody = encodeRespError "Tarif belum ditentukan." }
-gagalToServantErr _ =
-  err500 { errBody = encodeRespError "Mohon bilang ke Ibnu." }
 
 instance Exception Gagal

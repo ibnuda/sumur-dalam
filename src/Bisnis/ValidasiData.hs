@@ -1,15 +1,17 @@
 {-# LANGUAGE FlexibleContexts #-}
 module Bisnis.ValidasiData
   ( penggunaAda
+  , penggunaPunyaMeteran
   , meteranHarusAda
   , meteranBulanIniHarusIsi
   , meteranBulanIniHarusKosong
   , tarifTerbaru
   , tahunBulanHarusValid
   , tahunBulanLalu
+  , tagihanAda
   ) where
 
-import           Protolude
+import           Protolude                 hiding (get)
 
 import           Database.Esqueleto
 
@@ -21,6 +23,8 @@ import           Types
 
 import           Pertanyaan.TentangMinum
 import           Pertanyaan.TentangSistem
+import           Pertanyaan.TentangTagihan
+import           Pertanyaan.TentangPengguna
 
 -- | Memeriksa apakah pengguna dengan nomor telpon di parameter
 --   ada pada sistem atau tidak.
@@ -35,8 +39,18 @@ penggunaAda notelp = do
     Nothing -> throwError $ GagalPenggunaNil notelp
     Just x  -> return x
 
+penggunaPunyaMeteran
+  :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m)
+  => Text
+  -> m (Entity Meteran)
+penggunaPunyaMeteran notelp = do
+  meteran <- runDb $ selectMeteranPengguna notelp
+  case meteran of
+    []  -> throwError $ GagalPenggunaTunaMeteran
+    x:_ -> return x
+
 -- | Memeriksa apakah meteran dengan nomor meteran di parameter
---   ada pada sistem atau tidak.
+--   ada pada kistem atau tidak.
 --   Akan melempar galat `GagalMeteranNil text` bila tidak ada.
 meteranHarusAda
   :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m)
@@ -119,3 +133,13 @@ tahunBulanLalu t b = do
       hariterakhir      = addDays (-1) haripertama
       (tlalu, blalu, _) = toGregorian hariterakhir
   return (tlalu, blalu)
+
+tagihanAda
+  :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m)
+  => Int64
+  -> m (Entity Tagihan)
+tagihanAda tid = do
+  tagihan <- runDb $ selectTagihan $ toSqlKey tid
+  case tagihan of
+    []  -> throwError $ GagalTagihanNil tid
+    x:_ -> return x

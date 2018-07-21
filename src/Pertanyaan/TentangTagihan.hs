@@ -3,9 +3,11 @@
 {-# LANGUAGE TypeFamilies     #-}
 module Pertanyaan.TentangTagihan where
 
-import           Protolude          hiding (from, (<&>), on)
+import           Protolude          hiding (from, on, (<&>))
 
 import           Database.Esqueleto
+
+import           Data.Time
 
 import           Model
 
@@ -18,13 +20,35 @@ insertTagihan
   -> ReaderT backend m (Key Tagihan)
 insertTagihan mid tid = insert $ Tagihan mid tid Nothing
 
+selectTagihan
+  :: ( PersistUniqueRead backend
+     , PersistQueryRead backend
+     , BackendCompatible SqlBackend backend
+     , MonadIO m
+     )
+  => Key Tagihan
+  -> ReaderT backend m [Entity Tagihan]
+selectTagihan tid = do
+  select $ from $ \tagihan -> do
+    where_ $ tagihan ^. TagihanId ==. val tid
+    limit 1
+    return tagihan
+
+updateTagihan
+  :: MonadIO m => Key Tagihan -> Day -> ReaderT SqlBackend m ()
+updateTagihan tid h = do
+  update $ \tagihan -> do
+    set tagihan [TagihanTanggalBayar =. (just $ val h)]
+    where_ $ tagihan ^. TagihanId ==. val tid
+
 selectDaftarTagihanByTahunBulan
   :: ( PersistUniqueRead backend
      , PersistQueryRead backend
      , BackendCompatible SqlBackend backend
      , MonadIO m
      )
-  => Int64
+  => Maybe Text
+  -> Int64
   -> Int
   -> Int64
   -> Int
@@ -39,7 +63,7 @@ selectDaftarTagihanByTahunBulan
          , Value Int64
          )
        ]
-selectDaftarTagihanByTahunBulan tini bini tlalu blalu = do
+selectDaftarTagihanByTahunBulan mnotelp tini bini tlalu blalu = do
   select
     $ from
     $ \(pengguna `InnerJoin` meteran `LeftOuterJoin` minum `LeftOuterJoin` tagihan `InnerJoin` tarif) ->
@@ -50,6 +74,7 @@ selectDaftarTagihanByTahunBulan tini bini tlalu blalu = do
           on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
           where_ $ minum ^. MinumTahun ==. val tini
           where_ $ minum ^. MinumBulan ==. val bini
+          whereOpsional_ pengguna PenggunaNomorTelp mnotelp
           let minumbulanlalu =
                 minumDiTahunBulan (meteran ^. MeteranId) (val tlalu) (val blalu)
           return

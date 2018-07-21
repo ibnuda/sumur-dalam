@@ -29,9 +29,7 @@ administrasiSistemApi
   :: MonadIO m
   => AuthResult Pengguna
   -> ServerT AdministrasiSistemApi (PenanganT m)
-administrasiSistemApi a =
-  panic "belum dibuat"
-    :<|> getTarifTerbaruPenangan a
+administrasiSistemApi a = panic "belum dibuat" :<|> getTarifTerbaruPenangan a
 
 administrasiSistemServer
   :: Konfigurasi -> AuthResult Pengguna -> Server AdministrasiSistemApi

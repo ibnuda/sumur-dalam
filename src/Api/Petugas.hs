@@ -38,7 +38,8 @@ type PetugasApi =
 petugasProxy :: Proxy PetugasApi
 petugasProxy = Proxy
 
-petugasApi :: MonadIO m => AuthResult Pengguna -> ServerT PetugasApi (PenanganT m)
+petugasApi
+  :: MonadIO m => AuthResult Pengguna -> ServerT PetugasApi (PenanganT m)
 petugasApi a =
   getDaftarPelangganPenangan a
     :<|> getMinumPelangganPenangan a
@@ -46,4 +47,5 @@ petugasApi a =
     :<|> putCatatAirPenangan a
 
 petugasServer :: Konfigurasi -> AuthResult Pengguna -> Server PetugasApi
-petugasServer c a = hoistServer petugasProxy (penanganKeHandler c) (petugasApi a)
+petugasServer c a =
+  hoistServer petugasProxy (penanganKeHandler c) (petugasApi a)
