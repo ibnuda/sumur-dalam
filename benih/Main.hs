@@ -31,11 +31,13 @@ main = do
   password <- getLine
   putStr ("alamat: " :: [Char])
   alamat <- getLine
-  _      <- flip runSqlPool pool $ do
+  putStr ("wilayah: " :: [Char])
+  wilayah <- getLine
+  _       <- flip runSqlPool pool $ do
     _ <- insertGrup SuperAdmin
     _ <- insertGrup Admin
     _ <- insertGrup Petugas
     _ <- insertGrup Pelanggan
     _ <- insertTarif 0 10 1000 20 1000 20000
-    insertPengguna nama telepon password SuperAdmin alamat
+    insertPengguna nama telepon password SuperAdmin alamat wilayah
   putText "Nice."

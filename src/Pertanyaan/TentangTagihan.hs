@@ -85,7 +85,8 @@ selectTagihanPengguna
      , BackendCompatible SqlBackend backend
      , MonadIO m
      )
-  => Text
+  => Maybe (Key Tagihan)
+  -> Maybe Text
   -> ReaderT
        backend
        m
@@ -96,7 +97,7 @@ selectTagihanPengguna
          , Entity Tarif
          )
        ]
-selectTagihanPengguna notelp = do
+selectTagihanPengguna mtid mnotelp = do
   select
     $ from
     $ \(pengguna `InnerJoin` meteran `LeftOuterJoin` minum `LeftOuterJoin` tagihan `InnerJoin` tarif) ->
@@ -105,6 +106,7 @@ selectTagihanPengguna notelp = do
           on $ minum ^. MinumId ==. tagihan ^. TagihanMinumId
           on $ meteran ^. MeteranId ==. minum ^. MinumMeteranId
           on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
-          where_ $ pengguna ^. PenggunaNomorTelp ==. val notelp
+          whereOpsional_ pengguna PenggunaNomorTelp mnotelp
+          whereOpsional_ tagihan TagihanId mtid
           orderBy [asc (minum ^. MinumId)]
           return (pengguna, meteran, tagihan, minum, tarif)

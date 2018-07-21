@@ -6,8 +6,6 @@ module Penangan.Pintu
 
 import           Protolude
 
-import           Servant
-
 import           Database.Esqueleto (fromSqlKey)
 
 import           Conf

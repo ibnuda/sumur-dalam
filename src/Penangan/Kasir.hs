@@ -47,3 +47,14 @@ getDaftarTagihanPenggunaPenangan (Authenticated admin) notelp =
   querytagihanpenggunaKeResponse <$> lihatDaftarTagihanPengguna admin notelp
 getDaftarTagihanPenggunaPenangan _ _ =
   throwError $ GagalTakBerwenang "Lihat tagihan pengguna."
+
+putBayarTagihanPenangan
+  :: MonadIO m
+  => AuthResult Pengguna
+  -> Text
+  -> Int64
+  -> PenanganT m ResponseDataTagihan
+putBayarTagihanPenangan (Authenticated a) notelp tid =
+  unsextuple querytagihanKeResponse <$> bayarTagihan a notelp tid
+putBayarTagihanPenangan _ _ _ =
+  throwError $ GagalTakBerwenang "Lihat tagihan pengguna."

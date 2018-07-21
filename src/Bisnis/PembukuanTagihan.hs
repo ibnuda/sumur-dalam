@@ -4,8 +4,8 @@ module Bisnis.PembukuanTagihan where
 
 import           Protolude
 
-import           Database.Esqueleto
 import           Data.Time
+import           Database.Esqueleto
 
 import           Conf
 import           Model
@@ -41,12 +41,36 @@ lihatDaftarTagihan admin mtahun mbulan = do
                                           (fromInteger tlalu)
                                           blalu
 
-bayarTagihan admin nomortagihan = do
+bayarTagihan
+  :: (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)
+  => Pengguna
+  -> Text
+  -> Int64
+  -> m
+       ( Entity Pengguna
+       , Entity Meteran
+       , Entity Tagihan
+       , Entity Minum
+       , Entity Tarif
+       , Value Int64
+       )
+bayarTagihan admin notelp nomortagihan = do
   _ <- kewenanganMinimalPengguna admin Admin
   _ <- tagihanAda nomortagihan
   h <- utctDay <$> liftIO getCurrentTime
-  _ <- runDb $ updateTagihan (toSqlKey nomortagihan) h
-  return ()
+  let (tini, bini, _) = toGregorian h
+  (tlalu, blalu) <- tahunBulanLalu tini bini
+  t <- runDb $ do
+    updateTagihan         (toSqlKey nomortagihan)        h
+    selectDaftarTagihanByTahunBulan (Just notelp)
+                                    (fromInteger tini)
+                                    bini
+                                    (fromInteger tlalu)
+                                    blalu
+
+  case t of
+    []  -> throwError $ GagalTagihanNil nomortagihan
+    x:_ -> return x
 
 lihatTagihanPengguna
   :: (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)
@@ -91,4 +115,4 @@ lihatDaftarTagihanPengguna
 lihatDaftarTagihanPengguna admin nomortelepon = do
   _ <- kewenanganMinimalPengguna admin Admin
   _ <- penggunaPunyaMeteran nomortelepon
-  runDb $ selectTagihanPengguna nomortelepon
+  runDb $ selectTagihanPengguna Nothing (Just nomortelepon)
