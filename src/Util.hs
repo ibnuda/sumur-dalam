@@ -48,6 +48,9 @@ untriple f (a, b, c) = f a b c
 unquadruple :: (t1 -> t2 -> t3 -> t4 -> t5) -> (t1, t2, t3, t4) -> t5
 unquadruple f (a, b, c, d) = f a b c d
 
+unquintuple :: (t1 -> t2 -> t3 -> t4 -> t5 -> t6) -> (t1, t2, t3, t4, t5) -> t6
+unquintuple f (a, b, c, d, e) = f a b c d e
+
 unsextuple
   :: (t1 -> t2 -> t3 -> t4 -> t5 -> t6 -> t7) -> (t1, t2, t3, t4, t5, t6) -> t7
 unsextuple f (a, b, c, d, e, f') = f a b c d e f'
@@ -90,6 +93,23 @@ querytagihanKeResponse pengguna meteran tagihan minum tarif (Value lalu) =
                       lalu
                       (minumSampai $ entityVal minum)
                       (tagihanTanggalBayar $ entityVal tagihan)
+
+querytagihanpenggunaKeResponse
+  :: [ ( Entity Pengguna
+       , Entity Meteran
+       , Entity Tagihan
+       , Entity Minum
+       , Entity Tarif
+       )
+     ]
+  -> [ResponseDataTagihan]
+querytagihanpenggunaKeResponse [] = []
+querytagihanpenggunaKeResponse ((p, m, t, mi, ta):[]) =
+  [querytagihanKeResponse p m t mi ta (Value 0)]
+querytagihanpenggunaKeResponse ((p, m, t, mi, ta):(p', m', t', mi', ta'):xs) =
+  let lalu = minumSampai $ entityVal mi'
+  in  querytagihanKeResponse p m t mi ta (Value lalu)
+        : querytagihanpenggunaKeResponse ((p', m', t', mi', ta') : xs)
 
 -- | "https://github.com/haskell-servant/servant-auth/pull/107/commits/3813a4d979dfbd47b6f9b667dfe163dd4743c141"
 generateSecret :: MonadRandom m => m ByteString

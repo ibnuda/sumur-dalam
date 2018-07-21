@@ -52,8 +52,8 @@ lihatTagihanPengguna
   :: (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)
   => Pengguna
   -> Text
-  -> Maybe Integer
-  -> Maybe Int
+  -> Integer
+  -> Int
   -> m
        ( Entity Pengguna
        , Entity Meteran
@@ -62,10 +62,10 @@ lihatTagihanPengguna
        , Entity Tarif
        , Value Int64
        )
-lihatTagihanPengguna admin nomortelepon mtahun mbulan = do
+lihatTagihanPengguna admin nomortelepon tahun bulan = do
   _              <- kewenanganMinimalPengguna admin Admin
   _              <- penggunaPunyaMeteran nomortelepon
-  (tini , bini ) <- tahunBulanHarusValid mtahun mbulan
+  (tini , bini ) <- tahunBulanHarusValid (Just tahun) (Just bulan)
   (tlalu, blalu) <- tahunBulanLalu tini bini
   tagihan        <- runDb $ selectDaftarTagihanByTahunBulan Nothing
                                                             (fromInteger tini)
@@ -76,7 +76,19 @@ lihatTagihanPengguna admin nomortelepon mtahun mbulan = do
     []  -> throwError $ GagalTagihanTahunBulanNil tini bini
     x:_ -> return x
 
+lihatDaftarTagihanPengguna
+  :: (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)
+  => Pengguna
+  -> Text
+  -> m
+       [ ( Entity Pengguna
+         , Entity Meteran
+         , Entity Tagihan
+         , Entity Minum
+         , Entity Tarif
+         )
+       ]
 lihatDaftarTagihanPengguna admin nomortelepon = do
   _ <- kewenanganMinimalPengguna admin Admin
   _ <- penggunaPunyaMeteran nomortelepon
-  return ()
+  runDb $ selectTagihanPengguna nomortelepon

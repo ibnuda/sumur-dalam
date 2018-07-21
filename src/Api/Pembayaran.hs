@@ -23,8 +23,11 @@ type PembayaranApi =
     :> Get '[ JSON] [ResponseDataTagihan]
   :<|> "tagihan"
     :> Capture "nomortelp" Text
-    :> QueryParam "tahun" Integer
-    :> QueryParam "bulan" Int
+    :> Get '[ JSON] [ResponseDataTagihan]
+  :<|> "tagihan"
+    :> Capture "nomortelp" Text
+    :> Capture "tahun" Integer
+    :> Capture "bulan" Int
     :> Get '[ JSON] ResponseDataTagihan
 
 pembayaranProxy :: Proxy PembayaranApi
@@ -34,7 +37,8 @@ pembayaranApi
   :: MonadIO m => AuthResult Pengguna -> ServerT PembayaranApi (PenanganT m)
 pembayaranApi a =
   getDaftarDataTagihanPenangan a
-  :<|> getTagihanPenggunaTahunBulanPenangan a
+    :<|> getDaftarTagihanPenggunaPenangan a
+    :<|> getTagihanPenggunaTahunBulanPenangan a
 
 pembayaranServer :: Konfigurasi -> AuthResult Pengguna -> Server PembayaranApi
 pembayaranServer c a =

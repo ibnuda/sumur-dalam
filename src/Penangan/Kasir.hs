@@ -19,7 +19,7 @@ getDaftarDataTagihanPenangan
   -> Maybe Integer
   -> Maybe Int
   -> PenanganT m [ResponseDataTagihan]
-getDaftarDataTagihanPenangan (Authenticated admin) mtahun mbulan = do
+getDaftarDataTagihanPenangan (Authenticated admin) mtahun mbulan =
   map (unsextuple querytagihanKeResponse)
     <$> lihatDaftarTagihan admin mtahun mbulan
 getDaftarDataTagihanPenangan _ _ _ =
@@ -29,10 +29,21 @@ getTagihanPenggunaTahunBulanPenangan
   :: MonadIO m
   => AuthResult Pengguna
   -> Text
-  -> Maybe Integer
-  -> Maybe Int
+  -> Integer
+  -> Int
   -> PenanganT m ResponseDataTagihan
-getTagihanPenggunaTahunBulanPenangan (Authenticated admin) notelp mtahun mbulan = do
-  unsextuple querytagihanKeResponse <$> lihatTagihanPengguna admin notelp mtahun mbulan
+getTagihanPenggunaTahunBulanPenangan (Authenticated admin) notelp tahun bulan =
+  unsextuple querytagihanKeResponse
+    <$> lihatTagihanPengguna admin notelp tahun bulan
 getTagihanPenggunaTahunBulanPenangan _ _ _ _ =
+  throwError $ GagalTakBerwenang "Lihat tagihan pengguna."
+
+getDaftarTagihanPenggunaPenangan
+  :: MonadIO m
+  => AuthResult Pengguna
+  -> Text
+  -> PenanganT m [ResponseDataTagihan]
+getDaftarTagihanPenggunaPenangan (Authenticated admin) notelp =
+  querytagihanpenggunaKeResponse <$> lihatDaftarTagihanPengguna admin notelp
+getDaftarTagihanPenggunaPenangan _ _ =
   throwError $ GagalTakBerwenang "Lihat tagihan pengguna."

@@ -34,8 +34,7 @@ selectTagihan tid = do
     limit 1
     return tagihan
 
-updateTagihan
-  :: MonadIO m => Key Tagihan -> Day -> ReaderT SqlBackend m ()
+updateTagihan :: MonadIO m => Key Tagihan -> Day -> ReaderT SqlBackend m ()
 updateTagihan tid h = do
   update $ \tagihan -> do
     set tagihan [TagihanTanggalBayar =. (just $ val h)]
@@ -75,13 +74,37 @@ selectDaftarTagihanByTahunBulan mnotelp tini bini tlalu blalu = do
           where_ $ minum ^. MinumTahun ==. val tini
           where_ $ minum ^. MinumBulan ==. val bini
           whereOpsional_ pengguna PenggunaNomorTelp mnotelp
-          let minumbulanlalu =
-                minumDiTahunBulan (meteran ^. MeteranId) (val tlalu) (val blalu)
-          return
-            ( pengguna
-            , meteran
-            , tagihan
-            , minum
-            , tarif
-            , minumbulanlalu
-            )
+          let minumbulanlalu = minumDiTahunBulan (meteran ^. MeteranId)
+                                                 (val tlalu)
+                                                 (val blalu)
+          return (pengguna, meteran, tagihan, minum, tarif, minumbulanlalu)
+
+selectTagihanPengguna
+  :: ( PersistUniqueRead backend
+     , PersistQueryRead backend
+     , BackendCompatible SqlBackend backend
+     , MonadIO m
+     )
+  => Text
+  -> ReaderT
+       backend
+       m
+       [ ( Entity Pengguna
+         , Entity Meteran
+         , Entity Tagihan
+         , Entity Minum
+         , Entity Tarif
+         )
+       ]
+selectTagihanPengguna notelp = do
+  select
+    $ from
+    $ \(pengguna `InnerJoin` meteran `LeftOuterJoin` minum `LeftOuterJoin` tagihan `InnerJoin` tarif) ->
+        do
+          on $ tagihan ^. TagihanTarifId ==. tarif ^. TarifId
+          on $ minum ^. MinumId ==. tagihan ^. TagihanMinumId
+          on $ meteran ^. MeteranId ==. minum ^. MinumMeteranId
+          on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
+          where_ $ pengguna ^. PenggunaNomorTelp ==. val notelp
+          orderBy [asc (minum ^. MinumId)]
+          return (pengguna, meteran, tagihan, minum, tarif)
