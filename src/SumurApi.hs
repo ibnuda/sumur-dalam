@@ -20,19 +20,25 @@ import           Util
 
 import           Api.Otorisasi
 import           Api.Petugas
+import           Api.AdministrasiSistem
+import           Api.Pembayaran
 
 type SumurApi a =
   OtorisasiApi
     :<|> (Auth a Pengguna :> PetugasApi)
+    :<|> (Auth a Pengguna :> AdministrasiSistemApi)
+    :<|> (Auth a Pengguna :> PembayaranApi)
     :<|> Raw
 
-sumurProxy :: Proxy (SumurApi '[ JWT])
+sumurProxy :: Proxy (SumurApi '[JWT])
 sumurProxy = Proxy
 
 sumurServer :: Konfigurasi -> Server (SumurApi a)
-sumurServer conf =
-  otorisasiServer conf
-    :<|> petugasServer conf
+sumurServer c =
+  otorisasiServer c
+    :<|> petugasServer c
+    :<|> administrasiSistemServer c
+    :<|> pembayaranServer c
     :<|> serveDirectoryFileServer ""
 
 connstring :: ByteString

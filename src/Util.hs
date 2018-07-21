@@ -6,11 +6,16 @@ import           Protolude
 
 import           Crypto.BCrypt
 import           Crypto.JOSE
+
+import qualified Data.ByteString       as B
 import qualified Data.ByteString.Char8 as BC (pack)
 import qualified Data.ByteString.Lazy  as BL
-import qualified Data.ByteString       as B
 import           Data.Text             (unpack)
+
+import           Database.Esqueleto
+
 import           Data.Time.Clock
+
 import           Servant.Auth.Server
 
 import           Conf
@@ -37,11 +42,53 @@ buatToken pengguna = do
     Left  _ -> throwError GagalMasuk
     Right y -> return . decodeUtf8 . BL.toStrict $ y
 
-untriad :: (t1 -> t2 -> t3 -> t4) -> (t1, t2, t3) -> t4
-untriad f (a, b, c) = f a b c
+untriple :: (t1 -> t2 -> t3 -> t4) -> (t1, t2, t3) -> t4
+untriple f (a, b, c) = f a b c
 
-unquad :: (t1 -> t2 -> t3 -> t4 -> t5) -> (t1, t2, t3, t4) -> t5
-unquad f (a, b, c, d) = f a b c d
+unquadruple :: (t1 -> t2 -> t3 -> t4 -> t5) -> (t1, t2, t3, t4) -> t5
+unquadruple f (a, b, c, d) = f a b c d
+
+unsextuple ::
+     (t1 -> t2 -> t3 -> t4 -> t5 -> t6 -> t7) -> (t1, t2, t3, t4, t5, t6) -> t7
+unsextuple f (a, b, c, d, e, f') = f a b c d e f'
+
+tarifKeResponse :: Tarif -> ResponseDataTagihanTarif
+tarifKeResponse Tarif {..} =
+  let itemawal =
+        ResponseDataTagihanTarifItem 0 (Just tarifSampaiAwal) tarifHargaAwal
+      itemteng = ResponseDataTagihanTarifItem tarifSampaiAwal
+                                              (Just tarifSampaiTengah)
+                                              tarifHargaTengah
+      itemakhi =
+        ResponseDataTagihanTarifItem tarifSampaiTengah Nothing tarifHargaAkhir
+  in  ResponseDataTagihanTarif [itemawal, itemteng, itemakhi] tarifBiayaBeban
+
+penggunaMeteranKeResponse
+  :: Entity Pengguna -> Entity Meteran -> ResponseDataTagihanPengguna
+penggunaMeteranKeResponse (Entity pid Pengguna {..}) (Entity _ Meteran {..}) =
+  ResponseDataTagihanPengguna (fromSqlKey pid)
+                              penggunaNama
+                              penggunaNomorTelp
+                              penggunaAlamat
+                              penggunaWilayah
+                              meteranNomor
+
+querytagihanKeResponse
+  :: Entity Pengguna
+  -> Entity Meteran
+  -> Entity Tagihan
+  -> Entity Minum
+  -> Entity Tarif
+  -> Value Int64
+  -> ResponseDataTagihan
+querytagihanKeResponse pengguna meteran tagihan minum tarif (Value lalu) =
+  ResponseDataTagihan (fromSqlKey $ entityKey tagihan)
+                      (minumTahun $ entityVal minum)
+                      (minumBulan $ entityVal minum)
+                      (penggunaMeteranKeResponse pengguna meteran)
+                      (tarifKeResponse $ entityVal tarif)
+                      lalu
+                      (minumSampai $ entityVal minum)
 
 -- | "https://github.com/haskell-servant/servant-auth/pull/107/commits/3813a4d979dfbd47b6f9b667dfe163dd4743c141"
 generateSecret :: MonadRandom m => m ByteString

@@ -28,13 +28,18 @@ library
                      , Pertanyaan.TentangTagihan
                      , Bisnis.ValidasiData
                      , Bisnis.Otoritas
+                     , Bisnis.LainLain
                      , Bisnis.PembukuanAir
                      , Bisnis.PembukuanPelanggan
+                     , Bisnis.PembukuanTagihan
                      , Penangan.Pintu
                      , Penangan.Air
+                     , Penangan.Kasir
+                     , Penangan.Sistem
                      , Api.Otorisasi
                      , Api.AdministrasiSistem
                      , Api.Petugas
+                     , Api.Pembayaran 
                      , SumurApi
   build-depends:       base >= 4.7 && < 5
                      , protolude

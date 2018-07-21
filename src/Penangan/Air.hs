@@ -1,6 +1,11 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards  #-}
-module Penangan.Air where
+module Penangan.Air
+  ( getDaftarPelangganPenangan
+  , getMinumPelangganPenangan
+  , postCatatAirPenangan
+  , putCatatAirPenangan
+  ) where
 
 import           Protolude
 
@@ -34,7 +39,8 @@ getMinumPelangganPenangan
   -> Text
   -> PenanganT m ResponsePenggunaanAir
 getMinumPelangganPenangan (Authenticated petugas) nomormeteran =
-  unquad ResponsePenggunaanAir <$> lihatCatatanAirPelangganBulanIni petugas nomormeteran
+  unquadruple ResponsePenggunaanAir
+    <$> lihatCatatanAirPelangganBulanIni petugas nomormeteran
 getMinumPelangganPenangan _ _ =
   throwError $ GagalTakBerwenang "Tidak boleh melihat daftar pelanggan."
 
@@ -44,9 +50,9 @@ postCatatAirPenangan
   -> Text
   -> RequestCatatAir
   -> PenanganT m ResponsePenggunaanAir
-postCatatAirPenangan (Authenticated petugas) nomormeteran RequestCatatAir {..} =
-  untriad (ResponsePenggunaanAir nomormeteran) <$>
-  catatAirBulanIni petugas nomormeteran reqcatatairSampai
+postCatatAirPenangan (Authenticated p) nomormeteran RequestCatatAir {..} =
+  untriple (ResponsePenggunaanAir nomormeteran)
+    <$> catatAirBulanIni p nomormeteran reqcatatairSampai
 postCatatAirPenangan _ _ _ =
   throwError $ GagalTakBerwenang "Tidak boleh mencatat penggunaan air."
 
@@ -56,11 +62,8 @@ putCatatAirPenangan
   -> Text
   -> RequestCatatAir
   -> PenanganT m ResponsePenggunaanAir
-putCatatAirPenangan (Authenticated petugas) nomormeteran RequestCatatAir {..} =
-  do
-    (tahun, bulan, sampai) <- ubahCatatanAirBulanIni petugas
-                                                     nomormeteran
-                                                     reqcatatairSampai
-    return $ ResponsePenggunaanAir nomormeteran tahun bulan sampai
+putCatatAirPenangan (Authenticated p) nomormeteran RequestCatatAir {..} =
+  untriple (ResponsePenggunaanAir nomormeteran)
+    <$> ubahCatatanAirBulanIni p nomormeteran reqcatatairSampai
 putCatatAirPenangan _ _ _ =
   throwError $ GagalTakBerwenang "Tidak boleh mencatat penggunaan air."

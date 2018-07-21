@@ -1,6 +1,10 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards  #-}
-module Bisnis.PembukuanAir where
+module Bisnis.PembukuanAir
+  ( catatAirBulanIni
+  , lihatCatatanAirPelangganBulanIni
+  , ubahCatatanAirBulanIni
+  ) where
 
 import           Protolude
 
@@ -59,13 +63,13 @@ ubahCatatanAirBulanIni petugas nomormeteran sampai = do
   runDb $ updateMinum mid tahun bulan sampai Nothing
   return (tahun, bulan, sampai)
 
-lihatCatatanAirPelangganBulanIni ::
-     (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)
+lihatCatatanAirPelangganBulanIni
+  :: (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)
   => Pengguna
   -> Text
   -> m (Text, Integer, Int, Int64)
 lihatCatatanAirPelangganBulanIni petugas nomormeteran = do
-  Pengguna {..} <- kewenanganMinimalPengguna petugas Petugas
-  (tahun, bulan, _) <- toGregorian . utctDay <$> liftIO getCurrentTime
+  Pengguna {..}            <- kewenanganMinimalPengguna petugas Petugas
+  (tahun, bulan, _)        <- toGregorian . utctDay <$> liftIO getCurrentTime
   (_, Entity _ Minum {..}) <- meteranBulanIniHarusIsi nomormeteran tahun bulan
   return (nomormeteran, toInteger minumTahun, minumBulan, minumSampai)

@@ -1,6 +1,9 @@
 {-# LANGUAGE DataKinds     #-}
 {-# LANGUAGE TypeOperators #-}
-module Api.AdministrasiSistem where
+module Api.AdministrasiSistem
+  ( AdministrasiSistemApi
+  , administrasiSistemServer
+  ) where
 
 import           Protolude
 
@@ -9,10 +12,15 @@ import           Servant.Auth.Server
 
 import           Conf
 import           Model
+import           Types
+
+import           Penangan.Sistem
 
 type AdministrasiSistemApi =
   "sistem"
     :> Get '[ JSON] NoContent
+  :<|> "tarif"
+    :> Get '[ JSON] ResponseDataTagihanTarif
 
 administrasiSistemProxy :: Proxy AdministrasiSistemApi
 administrasiSistemProxy = Proxy
@@ -21,7 +29,9 @@ administrasiSistemApi
   :: MonadIO m
   => AuthResult Pengguna
   -> ServerT AdministrasiSistemApi (PenanganT m)
-administrasiSistemApi _ = panic "belum dibuat"
+administrasiSistemApi a =
+  panic "belum dibuat"
+    :<|> getTarifTerbaruPenangan a
 
 administrasiSistemServer
   :: Konfigurasi -> AuthResult Pengguna -> Server AdministrasiSistemApi

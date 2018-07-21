@@ -1,5 +1,13 @@
 {-# LANGUAGE FlexibleContexts #-}
-module Bisnis.ValidasiData where
+module Bisnis.ValidasiData
+  ( penggunaAda
+  , meteranHarusAda
+  , meteranBulanIniHarusIsi
+  , meteranBulanIniHarusKosong
+  , tarifTerbaru
+  , tahunBulanHarusValid
+  , tahunBulanLalu
+  ) where
 
 import           Protolude
 
@@ -102,3 +110,12 @@ tahunBulanHarusValid mtahun mbulan = do
           then throwError $ GagalTanggalBelumAda t b
           else return (t, b)
     _ -> throwError GagalTanggalTidakAda
+
+tahunBulanLalu
+  :: (MonadIO m, MonadError Gagal m) => Integer -> Int -> m (Integer, Int)
+tahunBulanLalu t b = do
+  (tahun, bulan) <- tahunBulanHarusValid (Just t) (Just b)
+  let haripertama       = fromGregorian tahun bulan 1
+      hariterakhir      = addDays (-1) haripertama
+      (tlalu, blalu, _) = toGregorian hariterakhir
+  return (tlalu, blalu)

@@ -36,6 +36,6 @@ main = do
     _ <- insertGrup Admin
     _ <- insertGrup Petugas
     _ <- insertGrup Pelanggan
-    _ <- insertTarif 0 10 1000 20 1000
+    _ <- insertTarif 0 10 1000 20 1000 20000
     insertPengguna nama telepon password SuperAdmin alamat
   putText "Nice."

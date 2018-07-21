@@ -1,6 +1,9 @@
 {-# LANGUAGE DataKinds     #-}
 {-# LANGUAGE TypeOperators #-}
-module Api.Otorisasi where
+module Api.Otorisasi
+  ( OtorisasiApi
+  , otorisasiServer
+  ) where
 
 import           Protolude
 

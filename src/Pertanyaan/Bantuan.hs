@@ -1,9 +1,13 @@
+{-# LANGUAGE MonoLocalBinds #-}
+{-# LANGUAGE FlexibleContexts #-}
 module Pertanyaan.Bantuan where
 
-import           Protolude
+import           Protolude                            hiding (from)
 
 import           Database.Esqueleto
 import           Database.Esqueleto.Internal.Language
+
+import           Model
 
 -- | Bantuan untuk query atas field dengan parameter opsional.
 whereOpsional_
@@ -23,3 +27,26 @@ updateHarusIsi
   -> expr (Update val)
 updateHarusIsi ent acc Nothing  = acc =. ent ^. acc
 updateHarusIsi _   acc (Just x) = acc =. val x
+
+minumDiTahunBulan
+  :: From query SqlExpr backend (SqlExpr (Entity Minum))
+  => SqlExpr (Value (Key Meteran))
+  -> SqlExpr (Value Int64)
+  -> SqlExpr (Value Int)
+  -> SqlExpr (Value Int64)
+minumDiTahunBulan meteranid tahun bulan = case_
+  [ when_
+      ( exists $ from $ \minum -> do
+        where_ $ minum ^. MinumMeteranId ==. meteranid
+        where_ $ minum ^. MinumTahun ==. tahun
+        where_ $ minum ^. MinumBulan ==. bulan
+      )
+      then_
+      ( sub_select $ from $ \minum -> do
+        where_ $ minum ^. MinumMeteranId ==. meteranid
+        where_ $ minum ^. MinumTahun ==. tahun
+        where_ $ minum ^. MinumBulan ==. bulan
+        return $ minum ^. MinumSampai
+      )
+  ]
+  (else_ $ val 0)

@@ -1,6 +1,9 @@
 {-# LANGUAGE DataKinds     #-}
 {-# LANGUAGE TypeOperators #-}
-module Api.Petugas where
+module Api.Petugas
+  ( PetugasApi
+  , petugasServer
+  ) where
 
 import           Protolude
 

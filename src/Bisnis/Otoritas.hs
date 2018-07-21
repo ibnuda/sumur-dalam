@@ -1,13 +1,13 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards  #-}
-module Bisnis.Otoritas where
+module Bisnis.Otoritas
+  ( otentikasi
+  , kewenanganMinimalPengguna
+  ) where
 
 import           Protolude
 
 import           Crypto.BCrypt
-
-import           Data.ByteString.Char8 (pack)
-import           Data.Text             (unpack)
 
 import           Database.Esqueleto
 
@@ -27,19 +27,34 @@ otentikasi
   -> Text -- ^ Password dari request.
   -> m (Pengguna, Text) -- ^ Teks merupakan token JWT.
 otentikasi notelp passw = do
-  mpengguna <- runDb $ getBy $ UniqueNomorTelp notelp
-  case mpengguna of
-    Nothing -> do
-      _ <- liftIO $ buatPassword passw
-      throwError GagalMasuk
-    Just (Entity _ Pengguna {..}) -> do
-      unless (validatePassword (punp penggunaPassword) (punp passw))
-             (throwError GagalMasuk)
-      token <- buatToken Pengguna {..}
-      return (Pengguna {..}, token)
+  mpengguna <- mungkinPengguna notelp
+  buatTokenAtauGagal (validasiPenggunaPassword mpengguna passw) passw
  where
-  punp :: Text -> ByteString
-  punp = pack . unpack
+  mungkinPengguna
+    :: (MonadReader Konfigurasi m, MonadIO m)
+    => Text
+    -> m (Maybe (Entity Pengguna))
+  mungkinPengguna tlp = runDb $ getBy $ UniqueNomorTelp tlp
+
+  validasiPenggunaPassword
+    :: Maybe (Entity Pengguna) -> Text -> Either Gagal Pengguna
+  validasiPenggunaPassword (Just (Entity _ Pengguna {..})) pw =
+    case (validatePassword (encodeUtf8 penggunaPassword) (encodeUtf8 pw)) of
+      True  -> Right Pengguna {..}
+      False -> Left GagalMasuk
+  validasiPenggunaPassword Nothing _ = Left GagalMasuk
+
+  buatTokenAtauGagal
+    :: (MonadReader Konfigurasi m, MonadIO m, MonadError Gagal m)
+    => Either Gagal Pengguna
+    -> Text
+    -> m (Pengguna, Text)
+  buatTokenAtauGagal (Left err) pw = do
+    _ <- liftIO $ buatPassword pw
+    throwError err
+  buatTokenAtauGagal (Right p) _ = do
+    token <- buatToken p
+    return (p, token)
 
 -- | Melakukan pemeriksaan kewenangan yang dimiliki oleh pengguna
 --   berdasarkan otorisasi JWT terhadap grup yang ada di sistem.

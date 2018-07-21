@@ -34,6 +34,7 @@ share
       password Text
       grupId GrupId
       alamat Text
+      wilayah Text
       UniqueNomorTelp nomorTelp
       deriving Generic
     Meteran
@@ -49,6 +50,7 @@ share
       tahun Int64
       bulan Int
       sampai Int64
+      UniqueMeteranTahunBulan meteranId tahun bulan
       deriving Generic
     Tarif
       hargaAwal Int64
@@ -56,6 +58,7 @@ share
       hargaTengah Int64
       sampaiTengah Int64
       hargaAkhir Int64
+      biayaBeban Int64
       deriving Generic
     Tagihan
       minumId MinumId

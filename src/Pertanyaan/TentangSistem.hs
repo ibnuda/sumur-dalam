@@ -36,5 +36,6 @@ insertTarif
   -> Int64
   -> Int64
   -> Int64
+  -> Int64
   -> ReaderT backend m (Key Tarif)
-insertTarif a b c d e = insert $ Tarif a b c d e
+insertTarif a b c d e f = insert $ Tarif a b c d e f

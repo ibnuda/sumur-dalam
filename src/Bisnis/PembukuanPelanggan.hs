@@ -1,6 +1,9 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards  #-}
-module Bisnis.PembukuanPelanggan where
+module Bisnis.PembukuanPelanggan
+  ( lihatPenggunaDanMeteran
+  , tambahPengguna
+  ) where
 
 import           Protolude
 
@@ -33,8 +36,9 @@ tambahPengguna
   -> Text
   -> Text
   -> Text
+  -> Text
   -> m (Entity Pengguna)
-tambahPengguna admin nama telp pw alamat = do
+tambahPengguna admin nama telp pw alamat wilayah = do
   _ <- kewenanganMinimalPengguna admin Admin
-  runDb $ insertPengguna nama telp pw Pelanggan alamat
+  runDb $ insertPengguna nama telp pw Pelanggan alamat wilayah
 

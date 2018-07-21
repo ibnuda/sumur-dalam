@@ -22,14 +22,15 @@ insertPengguna
   -> Text -- ^ Password.
   -> GrupSistem -- ^ Grup.
   -> Text -- ^ Alamat.
+  -> Text -- ^ Wilayah.
   -> ReaderT backend m (Entity Pengguna)
-insertPengguna nama telp password grup alamat = do
+insertPengguna nama telp password grup alamat wilayah = do
   mgrup <- getBy $ UniqueGrup grup
   case mgrup of
     Nothing -> panic ""
     Just g  -> do
       passw <- liftIO $ buatPassword password
-      insertEntity $ Pengguna nama telp passw (entityKey g) alamat
+      insertEntity $ Pengguna nama telp passw (entityKey g) alamat wilayah
 
 selectPenggunaMeteranDanCatatMinum
   :: ( PersistUniqueRead backend

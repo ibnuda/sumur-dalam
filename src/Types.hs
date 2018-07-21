@@ -61,6 +61,52 @@ data ResponseDaftarPelanggan = ResponseDaftarPelanggan
 instance ToJSON ResponseDaftarPelanggan where
   toJSON = genericToJSON omitsnake
 
+data ResponseDataTagihanMeteran = ResponseDataTagihanMeteran
+  { rdtmBulanLalu  :: Int64
+  , rdtmBulanIni   :: Int64
+  , rdtmPenggunaan :: Int64
+  } deriving (Generic)
+instance ToJSON ResponseDataTagihanMeteran where
+  toJSON = genericToJSON omitsnake
+
+data ResponseDataTagihanTarifItem = ResponseDataTagihanTarifItem
+  { rdttiMulai  :: Int64
+  , rdttiSampai :: Maybe Int64
+  , rdttiHarga  :: Int64
+  } deriving (Generic)
+instance ToJSON ResponseDataTagihanTarifItem where
+  toJSON = genericToJSON omitsnake
+
+data ResponseDataTagihanTarif = ResponseDataTagihanTarif
+  { rdttSatuan     :: [ResponseDataTagihanTarifItem]
+  , rdttBiayaBeban :: Int64
+  } deriving (Generic)
+instance ToJSON ResponseDataTagihanTarif where
+  toJSON = genericToJSON omitsnake
+
+data ResponseDataTagihanPengguna = ResponseDataTagihanPengguna
+  { rtdpNomorPelanggan :: Int64
+  , rdtpNamaPelanggan  :: Text
+  , rdtpNomorTelepon   :: Text
+  , rtdpAlamat         :: Text
+  , rtdpWilayah        :: Text
+  , rtdpNomorMeteran   :: Text
+  } deriving (Generic)
+instance ToJSON ResponseDataTagihanPengguna where
+  toJSON = genericToJSON omitsnake
+
+data ResponseDataTagihan = ResponseDataTagihan
+  { rdtNomorTagihan  :: Int64
+  , rdtTahun         :: Int64
+  , rdtBulan         :: Int
+  , rdtPengguna      :: ResponseDataTagihanPengguna
+  , rdtTarif         :: ResponseDataTagihanTarif
+  , rdtMinumLalu     :: Int64
+  , rdtMinumSekarang :: Int64
+  } deriving (Generic)
+instance ToJSON ResponseDataTagihan where
+  toJSON = genericToJSON omitsnake
+
 data Gagal
   = GagalMasuk
   | GagalAdminNil { gadminnilPid :: Int64 }
@@ -105,10 +151,7 @@ gagalToServantErr :: Gagal -> ServantErr
 gagalToServantErr GagalMasuk =
   err400 { errBody = encodeRespError "nomor telepon atau password salah" }
 gagalToServantErr (GagalAdminNil n) = err404
-  { errBody = encodeRespError
-    $  "nomor "
-    <> (pack . show $ n)
-    <> " bukan admin."
+  { errBody = encodeRespError $ "nomor " <> (pack . show $ n) <> " bukan admin."
   }
 gagalToServantErr (GagalBayar y) = err404 { errBody = encodeRespError y }
 gagalToServantErr (GagalCatatAir a n) =
@@ -134,7 +177,7 @@ gagalToServantErr (GagalTakBerwenang saat) =
 gagalToServantErr (GagalTambahPelanggan a d) =
   err401 { errBody = encodeRespError (a <> "saat " <> d) }
 gagalToServantErr GagalTanggalTidakAda =
-  err400{ errBody = encodeRespError "harap isi tanggal." }
+  err400 { errBody = encodeRespError "harap isi tanggal." }
 gagalToServantErr (GagalTanggalBelumAda t b) = err400
   { errBody = encodeRespError
     $  (pack . show $ t)
@@ -159,6 +202,7 @@ gagalToServantErr GagalPenggunaTunaMeteran =
   err404 { errBody = encodeRespError "Ybs tidak punya meteran." }
 gagalToServantErr GagalTarifKosong =
   err404 { errBody = encodeRespError "Tarif belum ditentukan." }
-gagalToServantErr _ = err500 { errBody = encodeRespError "Mohon bilang ke Ibnu."}
+gagalToServantErr _ =
+  err500 { errBody = encodeRespError "Mohon bilang ke Ibnu." }
 
 instance Exception Gagal

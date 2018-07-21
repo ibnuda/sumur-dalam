@@ -1,6 +1,8 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards #-}
-module Penangan.Pintu where
+module Penangan.Pintu
+  ( postMasukPenangan
+  ) where
 
 import           Protolude
 
