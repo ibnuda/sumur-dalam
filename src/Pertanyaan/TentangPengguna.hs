@@ -6,6 +6,7 @@ module Pertanyaan.TentangPengguna where
 import           Protolude          hiding (from, on)
 
 import           Database.Esqueleto
+import           Data.Time
 
 import           Model
 import           Model.Grouping
@@ -44,7 +45,7 @@ selectPenggunaMeteranDanCatatMinum
 selectPenggunaMeteranDanCatatMinum tahun bulan = do
   select $ from $ \(pengguna `InnerJoin` meteran) -> do
     on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
-    let something mid = case_
+    let sudahcatat mid = case_
           [ when_
               ( exists $ from $ \m -> do
                 where_ $ m ^. MinumTahun ==. val (fromInteger tahun)
@@ -55,8 +56,32 @@ selectPenggunaMeteranDanCatatMinum tahun bulan = do
               (val $ True)
           ]
           (else_ $ val False)
+    where_ $ meteran ^. MeteranTanggalPutus ==. nothing
     orderBy [desc (pengguna ^. PenggunaAlamat)]
-    return (pengguna, meteran, something (meteran ^. MeteranId))
+    return (pengguna, meteran, sudahcatat (meteran ^. MeteranId))
+
+selectPenggunaMeteran
+  :: ( PersistUniqueRead backend
+     , PersistQueryRead backend
+     , BackendCompatible SqlBackend backend
+     , MonadIO m
+     )
+  => Text
+  -> ReaderT backend m [(Entity Pengguna, Entity Meteran)]
+selectPenggunaMeteran nometeran = do
+  select $ from $ \(pengguna `InnerJoin` meteran) -> do
+    on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
+    where_ $ meteran ^. MeteranNomor ==. val nometeran
+    return (pengguna, meteran)
+
+insertMeteran
+  :: (BaseBackend backend ~ SqlBackend, PersistStoreWrite backend, MonadIO m)
+  => Key Pengguna
+  -> Text
+  -> Day
+  -> ReaderT backend m (Entity Meteran)
+insertMeteran pid nometeran h = do
+  insertEntity $ Meteran pid nometeran h Nothing
 
 selectMeteranPengguna
   :: ( PersistUniqueRead backend

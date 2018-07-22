@@ -37,7 +37,7 @@ library
                      , Penangan.Kasir
                      , Penangan.Sistem
                      , Api.Otorisasi
-                     , Api.AdministrasiSistem
+                     , Api.Administrasi
                      , Api.Petugas
                      , Api.Pembayaran 
                      , SumurApi

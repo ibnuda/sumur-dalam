@@ -22,15 +22,15 @@ type PembayaranApi =
     :> QueryParam "bulan" Int
     :> Get '[ JSON] [ResponseDataTagihan]
   :<|> "tagihan"
-    :> Capture "nomortelp" Text
+    :> Capture "nometeran" Text
     :> Get '[ JSON] [ResponseDataTagihan]
   :<|> "tagihan"
-    :> Capture "nomortelp" Text
+    :> Capture "nometeran" Text
     :> Capture "tahun" Integer
     :> Capture "bulan" Int
     :> Get '[ JSON] ResponseDataTagihan
   :<|> "tagihan"
-    :> Capture "nomortelp" Text
+    :> Capture "nometeran" Text
     :> Capture "tahun" Integer
     :> Capture "bulan" Int
     :> Put '[ JSON] ResponseDataTagihan

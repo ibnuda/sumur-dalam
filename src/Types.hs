@@ -38,6 +38,7 @@ data RequestPelangganBaru = RequestPelangganBaru
   , rpbNomorTelepon :: Text
   , rpbPassword     :: Text
   , rpbAlamat       :: Text
+  , rpbWilayah      :: Text
   , rpbNomorMeteran :: Text
   } deriving (Generic)
 instance FromJSON RequestPelangganBaru where
@@ -50,6 +51,16 @@ data ResponseDataPelangganToken = ResponseDataPelangganToken
   , respdptToken  :: Text
   } deriving (Generic)
 instance ToJSON ResponseDataPelangganToken where
+  toJSON = genericToJSON omitsnake
+
+data ResponseDataPelanggan = ResponseDataPelanggan
+  { rpNamaPelanggan :: Text
+  , rpNomorTelepon  :: Text
+  , rpAlamat        :: Text
+  , rpWilayah       :: Text
+  , rpNomorMeteran  :: Text
+  } deriving (Generic)
+instance ToJSON ResponseDataPelanggan where
   toJSON = genericToJSON omitsnake
 
 data ResponsePenggunaanAir = ResponsePenggunaanAir
@@ -100,13 +111,13 @@ data ResponseDataTagihanPengguna = ResponseDataTagihanPengguna
   , rdtpNomorTelepon   :: Text
   , rtdpAlamat         :: Text
   , rtdpWilayah        :: Text
-  , rtdpNomorMeteran   :: Text
   } deriving (Generic)
 instance ToJSON ResponseDataTagihanPengguna where
   toJSON = genericToJSON omitsnake
 
 data ResponseDataTagihan = ResponseDataTagihan
   { rdtNomorTagihan  :: Int64
+  , rtdNomorMeteran  :: Text
   , rdtTahun         :: Int64
   , rdtBulan         :: Int
   , rdtPengguna      :: ResponseDataTagihanPengguna

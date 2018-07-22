@@ -3,7 +3,7 @@
 {-# LANGUAGE TypeFamilies     #-}
 module Pertanyaan.TentangMinum where
 
-import           Protolude          hiding (from, (<&>), on)
+import           Protolude          hiding (from, (<&>), on, isNothing)
 
 import           Database.Esqueleto
 
@@ -66,3 +66,33 @@ updateMinum meteranid tahun bulan sampai mnomorpetugas = do
     where_ $ minum ^. MinumMeteranId ==. val meteranid
     where_ $ minum ^. MinumTahun ==. val (fromInteger tahun)
     where_ $ minum ^. MinumBulan ==. val bulan
+
+-- | Lihat meteran berdasarkan nomor meteran dan belum ditutup.
+selectMeteran
+  :: ( PersistUniqueRead backend
+     , PersistQueryRead backend
+     , BackendCompatible SqlBackend backend
+     , MonadIO m
+     )
+  => Text -- ^ Nomor meteran.
+  -> ReaderT backend m [Entity Meteran]
+selectMeteran nometer = do
+  select $ from $ \meteran -> do
+    where_ $ meteran ^. MeteranNomor ==. val nometer
+    where_ $ isNothing $ meteran ^. MeteranTanggalPutus
+    return meteran
+
+-- | Lihat meteran berdasarkan nomor meteran, terlepas sudah
+--   ditutup atau belum.
+selectMeteran'
+  :: ( PersistUniqueRead backend
+     , PersistQueryRead backend
+     , BackendCompatible SqlBackend backend
+     , MonadIO m
+     )
+  => Text -- ^ Nomor meteran.
+  -> ReaderT backend m [Entity Meteran]
+selectMeteran' nometer = do
+  select $ from $ \meteran -> do
+    where_ $ meteran ^. MeteranNomor ==. val nometer
+    return meteran

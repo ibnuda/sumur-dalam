@@ -20,13 +20,13 @@ import           Util
 
 import           Api.Otorisasi
 import           Api.Petugas
-import           Api.AdministrasiSistem
+import           Api.Administrasi
 import           Api.Pembayaran
 
 type SumurApi a =
   OtorisasiApi
     :<|> (Auth a Pengguna :> PetugasApi)
-    :<|> (Auth a Pengguna :> AdministrasiSistemApi)
+    :<|> (Auth a Pengguna :> AdministrasiApi)
     :<|> (Auth a Pengguna :> PembayaranApi)
     :<|> Raw
 
@@ -37,7 +37,7 @@ sumurServer :: Konfigurasi -> Server (SumurApi a)
 sumurServer c =
   otorisasiServer c
     :<|> petugasServer c
-    :<|> administrasiSistemServer c
+    :<|> administrasiServer c
     :<|> pembayaranServer c
     :<|> serveDirectoryFileServer ""
 

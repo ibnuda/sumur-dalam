@@ -1,8 +1,11 @@
 {-# LANGUAGE FlexibleContexts #-}
 module Bisnis.ValidasiData
   ( penggunaAda
+  , penggunaNil
   , penggunaPunyaMeteran
+  , meteranHarusNyala
   , meteranHarusAda
+  , meteranHarusNil
   , meteranBulanIniHarusIsi
   , meteranBulanIniHarusKosong
   , tarifTerbaru
@@ -11,7 +14,7 @@ module Bisnis.ValidasiData
   , tagihanAda
   ) where
 
-import           Protolude                 hiding (get)
+import           Protolude                  hiding (get)
 
 import           Database.Esqueleto
 
@@ -22,9 +25,9 @@ import           Model
 import           Types
 
 import           Pertanyaan.TentangMinum
+import           Pertanyaan.TentangPengguna
 import           Pertanyaan.TentangSistem
 import           Pertanyaan.TentangTagihan
-import           Pertanyaan.TentangPengguna
 
 -- | Memeriksa apakah pengguna dengan nomor telpon di parameter
 --   ada pada sistem atau tidak.
@@ -39,6 +42,19 @@ penggunaAda notelp = do
     Nothing -> throwError $ GagalPenggunaNil notelp
     Just x  -> return x
 
+-- | Memeriksa apakah pengguna dengan nomor telpon di parameter
+--   ada pada sistem atau tidak.
+--   Akan melempar galat `GagalPenggunaNil text` bila tidak ada.
+penggunaNil
+  :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m)
+  => Text -- ^ Nomor telepon pengguna.
+  -> m () -- ^ Kosong.
+penggunaNil notelp = do
+  mpengguna <- runDb $ getBy $ UniqueNomorTelp notelp
+  case mpengguna of
+    Nothing -> return ()
+    Just _  -> throwError $ GagalPenggunaAda notelp
+
 penggunaPunyaMeteran
   :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m)
   => Text
@@ -50,17 +66,43 @@ penggunaPunyaMeteran notelp = do
     x:_ -> return x
 
 -- | Memeriksa apakah meteran dengan nomor meteran di parameter
---   ada pada kistem atau tidak.
+--   masih digunakan atau tidak.
 --   Akan melempar galat `GagalMeteranNil text` bila tidak ada.
-meteranHarusAda
+meteranHarusNyala
   :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m)
   => Text -- ^ Nomor meteran.
   -> m (Entity Meteran)
-meteranHarusAda nometeran = do
-  mmeteran <- runDb $ getBy $ UniqueNomor nometeran
+meteranHarusNyala nometeran = do
+  mmeteran <- runDb $ selectMeteran nometeran
   case mmeteran of
-    Nothing -> throwError $ GagalMeteranNil nometeran
-    Just x  -> return x
+    []  -> throwError $ GagalMeteranNil nometeran
+    x:_ -> return x
+
+-- | Memeriksa apakah meteran dengan nomor meteran di parameter
+--   ada pada sistem atau tidak.
+--   Akan melempar galat `GagalMeteranNil text` bila tidak ada.
+meteranHarusAda
+  :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m)
+  => Text
+  -> m (Entity Meteran)
+meteranHarusAda nometeran = do
+  mmeteran <- runDb $ selectMeteran' nometeran
+  case mmeteran of
+    []  -> throwError $ GagalMeteranNil nometeran
+    x:_ -> return x
+
+-- | Memeriksa apakah meteran dengan nomor meteran di parameter
+--   ada pada sistem atau tidak.
+--   Akan melempar galat `GagalMeteranNil text` bila tidak ada.
+meteranHarusNil
+  :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m)
+  => Text
+  -> m ()
+meteranHarusNil nometeran = do
+  mmeteran <- runDb $ selectMeteran' nometeran
+  case mmeteran of
+    [] -> return ()
+    _  -> throwError $ GagalMeteranAda nometeran
 
 -- | Memeriksa tarif terbaru yang ada di sistem
 tarifTerbaru
@@ -140,8 +182,8 @@ tagihanAda
   -> Int64
   -> Int
   -> m (Entity Tagihan)
-tagihanAda notelp tahun bulan = do
-  tagihan <- runDb $ selectTagihan notelp tahun bulan
+tagihanAda nometeran tahun bulan = do
+  tagihan <- runDb $ selectTagihan nometeran tahun bulan
   case tagihan of
-    []  -> throwError $ GagalTagihanNil notelp tahun bulan
+    []  -> throwError $ GagalTagihanNil nometeran tahun bulan
     x:_ -> return x

@@ -74,7 +74,6 @@ penggunaMeteranKeResponse (Entity pid Pengguna {..}) (Entity _ Meteran {..}) =
                               penggunaNomorTelp
                               penggunaAlamat
                               penggunaWilayah
-                              meteranNomor
 
 querytagihanKeResponse
   :: Entity Pengguna
@@ -86,6 +85,7 @@ querytagihanKeResponse
   -> ResponseDataTagihan
 querytagihanKeResponse pengguna meteran tagihan minum tarif (Value lalu) =
   ResponseDataTagihan (fromSqlKey $ entityKey tagihan)
+                      (meteranNomor $ entityVal meteran)
                       (minumTahun $ entityVal minum)
                       (minumBulan $ entityVal minum)
                       (penggunaMeteranKeResponse pengguna meteran)

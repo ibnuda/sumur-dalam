@@ -32,9 +32,9 @@ getTagihanPenggunaTahunBulanPenangan
   -> Integer
   -> Int
   -> PenanganT m ResponseDataTagihan
-getTagihanPenggunaTahunBulanPenangan (Authenticated admin) notelp tahun bulan =
-  unsextuple querytagihanKeResponse
-    <$> lihatTagihanPengguna admin notelp tahun bulan
+getTagihanPenggunaTahunBulanPenangan (Authenticated admin) nometeran tahun bulan
+  = unsextuple querytagihanKeResponse
+    <$> lihatTagihanPengguna admin nometeran tahun bulan
 getTagihanPenggunaTahunBulanPenangan _ _ _ _ =
   throwError $ GagalTakBerwenang "Lihat tagihan pengguna."
 
@@ -43,8 +43,8 @@ getDaftarTagihanPenggunaPenangan
   => AuthResult Pengguna
   -> Text
   -> PenanganT m [ResponseDataTagihan]
-getDaftarTagihanPenggunaPenangan (Authenticated admin) notelp =
-  querytagihanpenggunaKeResponse <$> lihatDaftarTagihanPengguna admin notelp
+getDaftarTagihanPenggunaPenangan (Authenticated admin) nometeran =
+  querytagihanpenggunaKeResponse <$> lihatDaftarTagihanPengguna admin nometeran
 getDaftarTagihanPenggunaPenangan _ _ =
   throwError $ GagalTakBerwenang "Lihat tagihan pengguna."
 

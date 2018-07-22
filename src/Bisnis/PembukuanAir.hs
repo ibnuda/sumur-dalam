@@ -35,7 +35,7 @@ catatAirBulanIni
 catatAirBulanIni petugas nomormeteran sampai = do
   Pengguna {..}     <- kewenanganMinimalPengguna petugas Petugas
   (tahun, bulan, _) <- toGregorian . utctDay <$> liftIO getCurrentTime
-  (Entity mid met)  <- meteranHarusAda nomormeteran
+  (Entity mid met)  <- meteranHarusNyala nomormeteran
   _                 <- meteranBulanIniHarusKosong (meteranNomor met) tahun bulan
   (Entity tid _)    <- tarifTerbaru
   runDb $ do
@@ -58,7 +58,7 @@ ubahCatatanAirBulanIni
 ubahCatatanAirBulanIni petugas nomormeteran sampai = do
   Pengguna {..}       <- kewenanganMinimalPengguna petugas Petugas
   (tahun, bulan, _)   <- toGregorian . utctDay <$> liftIO getCurrentTime
-  _                   <- meteranHarusAda nomormeteran
+  _                   <- meteranHarusNyala nomormeteran
   ((Entity mid _), _) <- meteranBulanIniHarusIsi nomormeteran tahun bulan
   runDb $ updateMinum mid tahun bulan sampai Nothing
   return (tahun, bulan, sampai)

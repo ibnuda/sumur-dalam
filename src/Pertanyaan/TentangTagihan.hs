@@ -30,12 +30,12 @@ selectTagihan
   -> Int64
   -> Int
   -> ReaderT backend m [Entity Tagihan]
-selectTagihan notelp tahun bulan = do
+selectTagihan nometeran tahun bulan = do
   select $ from $ \(pengguna `InnerJoin` meteran `InnerJoin` minum `InnerJoin` tagihan) -> do
     on $ minum ^. MinumId ==. tagihan ^. TagihanMinumId
     on $ meteran ^. MeteranId ==. minum ^. MinumMeteranId
     on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
-    where_ $ pengguna ^. PenggunaNomorTelp ==. val notelp
+    where_ $ meteran ^. MeteranNomor ==. val nometeran
     where_ $ minum ^. MinumTahun ==. val tahun
     where_ $ minum ^. MinumBulan ==. val bulan
     return tagihan
@@ -103,7 +103,7 @@ selectTagihanPengguna
          , Entity Tarif
          )
        ]
-selectTagihanPengguna mtid mnotelp = do
+selectTagihanPengguna mtid mnometeran = do
   select
     $ from
     $ \(pengguna `InnerJoin` meteran `LeftOuterJoin` minum `LeftOuterJoin` tagihan `InnerJoin` tarif) ->
@@ -112,7 +112,7 @@ selectTagihanPengguna mtid mnotelp = do
           on $ minum ^. MinumId ==. tagihan ^. TagihanMinumId
           on $ meteran ^. MeteranId ==. minum ^. MinumMeteranId
           on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
-          whereOpsional_ pengguna PenggunaNomorTelp mnotelp
+          whereOpsional_ meteran MeteranNomor mnometeran
           whereOpsional_ tagihan TagihanId mtid
           orderBy [asc (minum ^. MinumId)]
           return (pengguna, meteran, tagihan, minum, tarif)
