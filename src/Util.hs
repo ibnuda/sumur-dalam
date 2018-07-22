@@ -42,6 +42,9 @@ buatToken pengguna = do
     Left  _ -> throwError GagalMasuk
     Right y -> return . decodeUtf8 . BL.toStrict $ y
 
+untuple :: (t1 -> t2 -> t3) -> (t1, t2) -> t3
+untuple f (a, b) = f a b
+
 untriple :: (t1 -> t2 -> t3 -> t4) -> (t1, t2, t3) -> t4
 untriple f (a, b, c) = f a b c
 

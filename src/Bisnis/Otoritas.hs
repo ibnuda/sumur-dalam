@@ -3,6 +3,7 @@
 module Bisnis.Otoritas
   ( otentikasi
   , kewenanganMinimalPengguna
+  , gantiPassword
   ) where
 
 import           Protolude
@@ -16,6 +17,8 @@ import           Model
 import           Model.Grouping
 import           Types
 import           Util
+
+import           Pertanyaan.TentangPengguna
 
 -- | Digunakan untuk memberikan aksis otorisasi ke sistem.
 --   Ketika pengguna tidak ada, sistem akan melakukan hashing password
@@ -74,3 +77,22 @@ kewenanganMinimalPengguna Pengguna {..} grup = do
       | y <= grup -> return Pengguna {..}
       | otherwise -> throwError
       $  GagalTakBerwenang "Tidak berhak melakukan hal tersebut."
+
+gantiPassword
+  :: (MonadReader Konfigurasi m, MonadIO m, MonadError Gagal m)
+  => Pengguna
+  -> Text
+  -> Text
+  -> m (Pengguna, Text)
+gantiPassword Pengguna {..} passlama passbaru = do
+  unless (validatePassword (encodeUtf8 penggunaPassword) (encodeUtf8 passlama)) $
+    throwError $ GagalTakBerwenang "Password lama beda."
+  hashpassbaru <- liftIO $ buatPassword passbaru
+  pengguna <- runDb $ do
+    updatePengguna penggunaNomorTelp Nothing (Just hashpassbaru) Nothing Nothing Nothing
+    selectPenggunaByNomorTelepon penggunaNomorTelp
+  case pengguna of
+    [] -> throwError $ GagalDB "Ganti password" "Pengguna tidak ada."
+    x:_ -> do
+      token <- buatToken $ entityVal x
+      return (entityVal x, token)

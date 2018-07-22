@@ -12,6 +12,8 @@ import           Model
 import           Model.Grouping
 import           Util
 
+import           Pertanyaan.Bantuan
+
 insertPengguna
   :: ( BaseBackend backend ~ SqlBackend
      , PersistStoreWrite backend
@@ -32,6 +34,27 @@ insertPengguna nama telp password grup alamat wilayah = do
     Just g  -> do
       passw <- liftIO $ buatPassword password
       insertEntity $ Pengguna nama telp passw (entityKey g) alamat wilayah
+
+updatePengguna
+  :: MonadIO m
+  => Text -- ^ Nomor telepon.
+  -> Maybe Text -- ^ Nama, opsional.
+  -> Maybe Text -- ^ Nomor telepon, opsional.
+  -> Maybe (Key Grup) -- ^ Grup Id, opsional.
+  -> Maybe Text -- ^ Alamat, opsional.
+  -> Maybe Text -- ^ Wilayah, opsional.
+  -> ReaderT SqlBackend m ()
+updatePengguna notelp mnama mpassw mgrup malamat mwilayah = do
+  update $ \pengguna -> do
+    set
+      pengguna
+      [ updateHarusIsi pengguna PenggunaNama     mnama
+      , updateHarusIsi pengguna PenggunaPassword mpassw
+      , updateHarusIsi pengguna PenggunaGrupId   mgrup
+      , updateHarusIsi pengguna PenggunaAlamat   malamat
+      , updateHarusIsi pengguna PenggunaWilayah  mwilayah
+      ]
+    where_ $ pengguna ^. PenggunaNomorTelp ==. val notelp
 
 selectPenggunaMeteranDanCatatMinum
   :: ( PersistUniqueRead backend
@@ -97,3 +120,16 @@ selectMeteranPengguna notelp = do
     where_ $ pengguna ^. PenggunaNomorTelp ==. val notelp
     limit 1
     return meteran
+
+selectPenggunaByNomorTelepon
+  :: ( PersistUniqueRead backend
+     , PersistQueryRead backend
+     , BackendCompatible SqlBackend backend
+     , MonadIO m
+     )
+  => Text
+  -> ReaderT backend m [Entity Pengguna]
+selectPenggunaByNomorTelepon notelp = do
+  select $ from $ \pengguna -> do
+    where_ $ pengguna ^. PenggunaNomorTelp ==. val notelp
+    return pengguna

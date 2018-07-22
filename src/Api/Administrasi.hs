@@ -22,18 +22,21 @@ type AdministrasiApi =
   :<|> "tambah"
     :> ReqBody '[ JSON] RequestPelangganBaru
     :> Get '[ JSON] ResponseDataPelanggan
+  :<|> "gantipass"
+    :> ReqBody '[ JSON] RequestGantiPassword
+    :> Put '[ JSON] ResponseDataPelangganToken
 
 administrasiProxy :: Proxy AdministrasiApi
 administrasiProxy = Proxy
 
 administrasiApi
-  :: MonadIO m
-  => AuthResult Pengguna
-  -> ServerT AdministrasiApi (PenanganT m)
-administrasiApi a = getTarifTerbaruPenangan a :<|> postTambahPelangganPenangan a
+  :: MonadIO m => AuthResult Pengguna -> ServerT AdministrasiApi (PenanganT m)
+administrasiApi a =
+  getTarifTerbaruPenangan a
+    :<|> postTambahPelangganPenangan a
+    :<|> putGantiPassword a
 
 administrasiServer
   :: Konfigurasi -> AuthResult Pengguna -> Server AdministrasiApi
-administrasiServer c a = hoistServer administrasiProxy
-                                     (penanganKeHandler c)
-                                     (administrasiApi a)
+administrasiServer c a =
+  hoistServer administrasiProxy (penanganKeHandler c) (administrasiApi a)

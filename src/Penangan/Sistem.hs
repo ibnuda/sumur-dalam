@@ -15,6 +15,7 @@ import           Util
 
 import           Bisnis.LainLain
 import           Bisnis.PembukuanPelanggan
+import           Bisnis.Otoritas
 
 getTarifTerbaruPenangan
   :: MonadIO m => AuthResult Pengguna -> PenanganT m ResponseDataTagihanTarif
@@ -45,3 +46,18 @@ postTambahPelangganPenangan (Authenticated admin) RequestPelangganBaru {..} =
     meteranNomor
 postTambahPelangganPenangan _ _ =
   throwError $ GagalTakBerwenang "Menambah pelanggan."
+
+putGantiPassword
+  :: MonadIO m
+  => AuthResult Pengguna
+  -> RequestGantiPassword
+  -> PenanganT m ResponseDataPelangganToken
+putGantiPassword (Authenticated pengguna) RequestGantiPassword {..} =
+  untuple f <$> gantiPassword pengguna rgpPassLama rgpPassBaru
+ where
+  f Pengguna {..} token = ResponseDataPelangganToken
+    penggunaNama
+    penggunaNomorTelp
+    (fromSqlKey penggunaGrupId)
+    token
+putGantiPassword _ _ = throwError $ GagalTakBerwenang "Ganti password."

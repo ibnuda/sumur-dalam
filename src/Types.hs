@@ -44,6 +44,13 @@ data RequestPelangganBaru = RequestPelangganBaru
 instance FromJSON RequestPelangganBaru where
   parseJSON = genericParseJSON omitsnake
 
+data RequestGantiPassword = RequestGantiPassword
+  { rgpPassLama :: Text
+  , rgpPassBaru :: Text
+  } deriving (Generic)
+instance FromJSON RequestGantiPassword where
+  parseJSON = genericParseJSON omitsnake
+
 data ResponseDataPelangganToken = ResponseDataPelangganToken
   { respdptNama   :: Text
   , respdptTelp   :: Text
