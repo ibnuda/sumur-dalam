@@ -10,6 +10,7 @@ import           Protolude
 import           Control.Monad.Logger
 import           Database.Persist.Postgresql
 import           Network.Wai.Handler.Warp
+import           Network.Wai.Middleware.Cors
 import           Servant
 import           Servant.Auth
 import           Servant.Auth.Server
@@ -57,6 +58,9 @@ running = do
     doMigration
     selectList [] []
   let jws  = defaultJWTSettings jwk
-      cfg  = defaultCookieSettings :. jws :. EmptyContext
+      kuki = defaultCookieSettings { cookieSameSite = AnySite }
+      cfg  = kuki :. jws :. EmptyContext
       conf = Konfigurasi pool jws grups
-  run 8080 $ serveWithContext sumurProxy cfg $ sumurServer conf
+  run 8080 $ cors (const $ Just policy) $ serveWithContext sumurProxy cfg $ sumurServer conf
+  where
+    policy = simpleCorsResourcePolicy { corsRequestHeaders = [ "content-type" ]}
