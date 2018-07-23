@@ -1,8 +1,10 @@
-{-# LANGUAGE DataKinds       #-}
-{-# LANGUAGE DeriveGeneric   #-}
-{-# LANGUAGE KindSignatures  #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeOperators   #-}
+{-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RankNTypes            #-}
+{-# LANGUAGE TypeFamilies          #-}
+{-# LANGUAGE TypeOperators         #-}
+{-# LANGUAGE UndecidableInstances  #-}
 module SumurApi where
 
 import           Protolude
@@ -11,6 +13,8 @@ import           Control.Monad.Logger
 import           Database.Persist.Postgresql
 import           Network.Wai.Handler.Warp
 import           Network.Wai.Middleware.Cors
+import           Network.Wai.Middleware.Servant.Options
+import           Network.Wai.Middleware.RequestLogger
 import           Servant
 import           Servant.Auth
 import           Servant.Auth.Server
@@ -19,28 +23,28 @@ import           Conf
 import           Model
 import           Util
 
-import           Api.Otorisasi
-import           Api.Petugas
 import           Api.Administrasi
+import           Api.Otorisasi
 import           Api.Pembayaran
+import           Api.Petugas
 
-type SumurApi a =
+type SumurApi =
   OtorisasiApi
-    :<|> (Auth a Pengguna :> PetugasApi)
-    :<|> (Auth a Pengguna :> AdministrasiApi)
-    :<|> (Auth a Pengguna :> PembayaranApi)
+    :<|> (Auth '[ JWT] Pengguna :> PetugasApi)
+    :<|> (Auth '[ JWT] Pengguna :> AdministrasiApi)
+    :<|> (Auth '[ JWT] Pengguna :> PembayaranApi)
     :<|> Raw
 
-sumurProxy :: Proxy (SumurApi '[JWT])
+sumurProxy :: Proxy SumurApi
 sumurProxy = Proxy
 
-sumurServer :: Konfigurasi -> Server (SumurApi a)
+sumurServer :: Konfigurasi -> Server SumurApi
 sumurServer c =
   otorisasiServer c
     :<|> petugasServer c
     :<|> administrasiServer c
     :<|> pembayaranServer c
-    :<|> serveDirectoryFileServer ""
+    :<|> serveDirectoryFileServer "depan"
 
 connstring :: ByteString
 connstring =
@@ -61,6 +65,15 @@ running = do
       kuki = defaultCookieSettings { cookieSameSite = AnySite }
       cfg  = kuki :. jws :. EmptyContext
       conf = Konfigurasi pool jws grups
-  run 8080 $ cors (const $ Just policy) $ serveWithContext sumurProxy cfg $ sumurServer conf
-  where
-    policy = simpleCorsResourcePolicy { corsRequestHeaders = [ "content-type" ]}
+  run 8080
+    $ logStdoutDev
+    $ cors (const $ Just policy)
+--  $ provideOptions sumurProxy
+    $ serveWithContext sumurProxy cfg
+    $ sumurServer conf
+ where
+  policy = simpleCorsResourcePolicy
+    { corsRequestHeaders = ["content-type"]
+    , corsMethods        = "POST" : "PUT" : simpleMethods
+    }
+
