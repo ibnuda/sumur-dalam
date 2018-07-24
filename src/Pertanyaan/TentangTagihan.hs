@@ -79,7 +79,7 @@ selectDaftarTagihanByTahunBulan mnotelp tini bini tlalu blalu = do
           on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
           where_ $ minum ^. MinumTahun ==. val tini
           where_ $ minum ^. MinumBulan ==. val bini
-          whereOpsional_ pengguna PenggunaNomorTelp mnotelp
+          whereOpsional_ meteran MeteranNomor mnotelp
           let minumbulanlalu = minumDiTahunBulan (meteran ^. MeteranId)
                                                  (val tlalu)
                                                  (val blalu)

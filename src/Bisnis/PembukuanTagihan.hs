@@ -115,7 +115,7 @@ lihatTagihanPengguna admin nometeran tahun bulan = do
   _              <- meteranHarusAda nometeran
   (tini , bini ) <- tahunBulanHarusValid (Just tahun) (Just bulan)
   (tlalu, blalu) <- tahunBulanLalu tini bini
-  tagihan        <- runDb $ selectDaftarTagihanByTahunBulan Nothing
+  tagihan        <- runDb $ selectDaftarTagihanByTahunBulan (Just nometeran)
                                                             (fromInteger tini)
                                                             bini
                                                             (fromInteger tlalu)

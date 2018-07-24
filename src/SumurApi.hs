@@ -7,6 +7,7 @@ import           Protolude
 import           Control.Monad.Logger
 import           Database.Persist.Postgresql
 import           Network.Wai.Handler.Warp
+import           Network.Wai.Middleware.RequestLogger
 import           Servant
 import           Servant.Auth
 import           Servant.Auth.Server
@@ -58,5 +59,6 @@ running = do
       cfg  = kuki :. jws :. EmptyContext
       conf = Konfigurasi pool jws grups
   run 8080
+    $ logStdoutDev
     $ serveWithContext sumurProxy cfg
     $ sumurServer conf
