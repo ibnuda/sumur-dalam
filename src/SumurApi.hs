@@ -1,10 +1,5 @@
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE RankNTypes            #-}
-{-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE TypeOperators         #-}
-{-# LANGUAGE UndecidableInstances  #-}
+{-# LANGUAGE DataKinds     #-}
+{-# LANGUAGE TypeOperators #-}
 module SumurApi where
 
 import           Protolude
@@ -12,9 +7,6 @@ import           Protolude
 import           Control.Monad.Logger
 import           Database.Persist.Postgresql
 import           Network.Wai.Handler.Warp
-import           Network.Wai.Middleware.Cors
-import           Network.Wai.Middleware.Servant.Options
-import           Network.Wai.Middleware.RequestLogger
 import           Servant
 import           Servant.Auth
 import           Servant.Auth.Server
@@ -66,14 +58,5 @@ running = do
       cfg  = kuki :. jws :. EmptyContext
       conf = Konfigurasi pool jws grups
   run 8080
-    $ logStdoutDev
-    $ cors (const $ Just policy)
---  $ provideOptions sumurProxy
     $ serveWithContext sumurProxy cfg
     $ sumurServer conf
- where
-  policy = simpleCorsResourcePolicy
-    { corsRequestHeaders = ["content-type"]
-    , corsMethods        = "POST" : "PUT" : simpleMethods
-    }
-

@@ -218,7 +218,7 @@ gagalToServantErr (GagalTagihanTahunBulanNil x y) = err404
     )
   }
 gagalToServantErr (GagalTakBerwenang saat) =
-  err401 { errBody = encodeRespError saat }
+  err403 { errBody = encodeRespError saat }
 gagalToServantErr (GagalTambahPelanggan a d) =
   err401 { errBody = encodeRespError (a <> "saat " <> d) }
 gagalToServantErr GagalTanggalTidakAda =
