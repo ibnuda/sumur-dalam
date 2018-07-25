@@ -58,7 +58,4 @@ running = do
       kuki = defaultCookieSettings { cookieSameSite = AnySite }
       cfg  = kuki :. jws :. EmptyContext
       conf = Konfigurasi pool jws grups
-  run 8080
-    $ logStdoutDev
-    $ serveWithContext sumurProxy cfg
-    $ sumurServer conf
+  run 8080 $ logStdoutDev $ serveWithContext sumurProxy cfg $ sumurServer conf

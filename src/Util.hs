@@ -107,12 +107,56 @@ querytagihanpenggunaKeResponse
      ]
   -> [ResponseDataTagihan]
 querytagihanpenggunaKeResponse [] = []
-querytagihanpenggunaKeResponse ((p, m, t, mi, ta):[]) =
+querytagihanpenggunaKeResponse [(p, m, t, mi, ta)] =
   [querytagihanKeResponse p m t mi ta (Value 0)]
 querytagihanpenggunaKeResponse ((p, m, t, mi, ta):(p', m', t', mi', ta'):xs) =
   let lalu = minumSampai $ entityVal mi'
   in  querytagihanKeResponse p m t mi ta (Value lalu)
         : querytagihanpenggunaKeResponse ((p', m', t', mi', ta') : xs)
+
+queryriwayatKeResponse
+  :: Entity Pengguna
+  -> Entity Meteran
+  -> [(Entity Minum, Entity Tagihan, Entity Tarif)]
+  -> ResponseRiwayatPelanggan
+queryriwayatKeResponse p m ts =
+  let Pengguna {..} = entityVal p
+      Meteran {..}  = entityVal m
+  in  ResponseRiwayatPelanggan penggunaNama
+                               penggunaNomorTelp
+                               penggunaAlamat
+                               penggunaWilayah
+                               meteranNomor
+                               meteranTanggalDaftar
+                               (querytagihansimpleKeResponse ts)
+
+querytagihansimpleKeResponse
+  :: [(Entity Minum, Entity Tagihan, Entity Tarif)] -> [ResponseTagihanSimple]
+querytagihansimpleKeResponse [] = []
+querytagihansimpleKeResponse [(m, tag, tar)] =
+  let Minum {..}   = entityVal m
+      Tagihan {..} = entityVal tag
+      tarif        = entityVal tar
+  in  [ ResponseTagihanSimple minumTahun
+                              minumBulan
+                              (tarifKeResponse tarif)
+                              0
+                              minumSampai
+                              tagihanTanggalBayar
+      ]
+querytagihansimpleKeResponse ((m, tag, tar):x@(m', _, _):xs) =
+  let minum        = entityVal m
+      Tagihan {..} = entityVal tag
+      minumlalu    = minumSampai (entityVal m')
+      tarif        = entityVal tar
+  in  ( ResponseTagihanSimple (minumTahun minum)
+                              (minumBulan minum)
+                              (tarifKeResponse tarif)
+                              minumlalu
+                              (minumSampai minum)
+                              tagihanTanggalBayar
+      )
+        : querytagihansimpleKeResponse (x : xs)
 
 -- | "https://github.com/haskell-servant/servant-auth/pull/107/commits/3813a4d979dfbd47b6f9b667dfe163dd4743c141"
 generateSecret :: MonadRandom m => m ByteString

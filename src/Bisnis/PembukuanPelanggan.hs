@@ -52,8 +52,8 @@ tambahPengguna admin nama telp pw alamat wilayah nometeran = do
   _ <- meteranHarusNil nometeran
   h <- utctDay <$> liftIO getCurrentTime
   x <- runDb $ do
-    Entity pid _ <- insertPengguna nama telp pw Pelanggan alamat wilayah
-    Entity _ met <- insertMeteran pid nometeran h
+    Entity pid _   <- insertPengguna nama telp pw Pelanggan alamat wilayah
+    Entity _   met <- insertMeteran pid nometeran h
     selectPenggunaMeteran $ meteranNomor met
   case x of
     []  -> throwError $ GagalDB "meteran tidak ada" "saat masukkan pengguna"

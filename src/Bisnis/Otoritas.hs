@@ -85,14 +85,20 @@ gantiPassword
   -> Text
   -> m (Pengguna, Text)
 gantiPassword Pengguna {..} passlama passbaru = do
-  unless (validatePassword (encodeUtf8 penggunaPassword) (encodeUtf8 passlama)) $
-    throwError $ GagalTakBerwenang "Password lama beda."
+  unless (validatePassword (encodeUtf8 penggunaPassword) (encodeUtf8 passlama))
+    $ throwError
+    $ GagalTakBerwenang "Password lama beda."
   hashpassbaru <- liftIO $ buatPassword passbaru
-  pengguna <- runDb $ do
-    updatePengguna penggunaNomorTelp Nothing (Just hashpassbaru) Nothing Nothing Nothing
+  pengguna     <- runDb $ do
+    updatePengguna penggunaNomorTelp
+                   Nothing
+                   (Just hashpassbaru)
+                   Nothing
+                   Nothing
+                   Nothing
     selectPenggunaByNomorTelepon penggunaNomorTelp
   case pengguna of
-    [] -> throwError $ GagalDB "Ganti password" "Pengguna tidak ada."
+    []  -> throwError $ GagalDB "Ganti password" "Pengguna tidak ada."
     x:_ -> do
       token <- buatToken $ entityVal x
       return (entityVal x, token)

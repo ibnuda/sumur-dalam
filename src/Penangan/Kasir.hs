@@ -15,9 +15,9 @@ import           Bisnis.PembukuanTagihan
 
 getDaftarDataTagihanPenangan
   :: MonadIO m
-  => AuthResult Pengguna
-  -> Maybe Integer
-  -> Maybe Int
+  => AuthResult Pengguna -- ^ Hasil otentikasi.
+  -> Maybe Integer -- ^ Tahun, opsional.
+  -> Maybe Int -- ^ Bulan, opsional.
   -> PenanganT m [ResponseDataTagihan]
 getDaftarDataTagihanPenangan (Authenticated admin) mtahun mbulan =
   map (unsextuple querytagihanKeResponse)
@@ -27,10 +27,10 @@ getDaftarDataTagihanPenangan _ _ _ =
 
 getTagihanPenggunaTahunBulanPenangan
   :: MonadIO m
-  => AuthResult Pengguna
-  -> Text
-  -> Integer
-  -> Int
+  => AuthResult Pengguna -- ^ Hasil otentikasi.
+  -> Text -- ^ Nomor meteran.
+  -> Integer -- ^ Tahun pencatatan.
+  -> Int -- ^ Bulan pencatatan.
   -> PenanganT m ResponseDataTagihan
 getTagihanPenggunaTahunBulanPenangan (Authenticated admin) nometeran tahun bulan
   = unsextuple querytagihanKeResponse
@@ -40,8 +40,8 @@ getTagihanPenggunaTahunBulanPenangan _ _ _ _ =
 
 getDaftarTagihanPenggunaPenangan
   :: MonadIO m
-  => AuthResult Pengguna
-  -> Text
+  => AuthResult Pengguna -- ^ Hasil otentikasi.
+  -> Text -- ^ Nomor meteran.
   -> PenanganT m [ResponseDataTagihan]
 getDaftarTagihanPenggunaPenangan (Authenticated admin) nometeran =
   querytagihanpenggunaKeResponse <$> lihatDaftarTagihanPengguna admin nometeran
@@ -50,12 +50,22 @@ getDaftarTagihanPenggunaPenangan _ _ =
 
 putBayarTagihanPenangan
   :: MonadIO m
-  => AuthResult Pengguna
-  -> Text
-  -> Integer
-  -> Int
+  => AuthResult Pengguna -- ^ Hasil otentikasi.
+  -> Text -- ^ Nomor meteran.
+  -> Integer -- ^ Tahun tagihan.
+  -> Int -- ^ Bulan tagihan.
   -> PenanganT m ResponseDataTagihan
-putBayarTagihanPenangan (Authenticated a) notelp tahun bulan =
-  unsextuple querytagihanKeResponse <$> bayarTagihan a notelp tahun bulan
+putBayarTagihanPenangan (Authenticated a) nometeran tahun bulan =
+  unsextuple querytagihanKeResponse <$> bayarTagihan a nometeran tahun bulan
 putBayarTagihanPenangan _ _ _ _ =
   throwError $ GagalTakBerwenang "Lihat tagihan pengguna."
+
+getRiwayatPelangganPenangan
+  :: MonadIO m
+  => AuthResult Pengguna -- ^ Hasil otentikasi.
+  -> Text -- ^ Nomor meteran.
+  -> PenanganT m ResponseRiwayatPelanggan
+getRiwayatPelangganPenangan (Authenticated a) nomet = do
+  untriple queryriwayatKeResponse <$> lihatRiwayatPelanggan a nomet
+getRiwayatPelangganPenangan _ _ =
+  throwError $ GagalTakBerwenang "Lihat riwayat pengguna."

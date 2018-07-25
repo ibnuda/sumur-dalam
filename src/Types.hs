@@ -136,6 +136,29 @@ data ResponseDataTagihan = ResponseDataTagihan
 instance ToJSON ResponseDataTagihan where
   toJSON = genericToJSON omitsnake
 
+data ResponseTagihanSimple = ResponseTagihanSimple
+  { rtsTahun         :: Int64
+  , rtsBulan         :: Int
+  , rtsTarif         :: ResponseDataTagihanTarif
+  , rtsMinumLalu     :: Int64
+  , rtsMinumSekarang :: Int64
+  , rtsTanggalBayar  :: Maybe Day
+  } deriving (Generic)
+instance ToJSON ResponseTagihanSimple where
+  toJSON = genericToJSON omitsnake
+
+data ResponseRiwayatPelanggan = ResponseRiwayatPelanggan
+  { rrpNamaPelanggan :: Text
+  , rppNomorTelepon  :: Text
+  , rppAlamat        :: Text
+  , rppWilayah       :: Text
+  , rppNomorMeteran  :: Text
+  , rppTanggalDaftar :: Day
+  , rppPenggunaanAir :: [ResponseTagihanSimple]
+  } deriving (Generic)
+instance ToJSON ResponseRiwayatPelanggan where
+  toJSON = genericToJSON omitsnake
+
 data Gagal
   = GagalMasuk
   | GagalAdminNil Int64

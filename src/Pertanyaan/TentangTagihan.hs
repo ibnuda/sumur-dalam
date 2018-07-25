@@ -31,14 +31,16 @@ selectTagihan
   -> Int
   -> ReaderT backend m [Entity Tagihan]
 selectTagihan nometeran tahun bulan = do
-  select $ from $ \(pengguna `InnerJoin` meteran `InnerJoin` minum `InnerJoin` tagihan) -> do
-    on $ minum ^. MinumId ==. tagihan ^. TagihanMinumId
-    on $ meteran ^. MeteranId ==. minum ^. MinumMeteranId
-    on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
-    where_ $ meteran ^. MeteranNomor ==. val nometeran
-    where_ $ minum ^. MinumTahun ==. val tahun
-    where_ $ minum ^. MinumBulan ==. val bulan
-    return tagihan
+  select
+    $ from
+    $ \(pengguna `InnerJoin` meteran `InnerJoin` minum `InnerJoin` tagihan) -> do
+        on $ minum ^. MinumId ==. tagihan ^. TagihanMinumId
+        on $ meteran ^. MeteranId ==. minum ^. MinumMeteranId
+        on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
+        where_ $ meteran ^. MeteranNomor ==. val nometeran
+        where_ $ minum ^. MinumTahun ==. val tahun
+        where_ $ minum ^. MinumBulan ==. val bulan
+        return tagihan
 
 updateTagihan :: MonadIO m => Key Tagihan -> Day -> ReaderT SqlBackend m ()
 updateTagihan tid h = do
@@ -68,7 +70,7 @@ selectDaftarTagihanByTahunBulan
          , Value Int64
          )
        ]
-selectDaftarTagihanByTahunBulan mnotelp tini bini tlalu blalu = do
+selectDaftarTagihanByTahunBulan mnometeran tini bini tlalu blalu = do
   select
     $ from
     $ \(pengguna `InnerJoin` meteran `LeftOuterJoin` minum `LeftOuterJoin` tagihan `InnerJoin` tarif) ->
@@ -79,7 +81,7 @@ selectDaftarTagihanByTahunBulan mnotelp tini bini tlalu blalu = do
           on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
           where_ $ minum ^. MinumTahun ==. val tini
           where_ $ minum ^. MinumBulan ==. val bini
-          whereOpsional_ meteran MeteranNomor mnotelp
+          whereOpsional_ meteran MeteranNomor mnometeran
           let minumbulanlalu = minumDiTahunBulan (meteran ^. MeteranId)
                                                  (val tlalu)
                                                  (val blalu)
@@ -113,6 +115,23 @@ selectTagihanPengguna mtid mnometeran = do
           on $ meteran ^. MeteranId ==. minum ^. MinumMeteranId
           on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
           whereOpsional_ meteran MeteranNomor mnometeran
-          whereOpsional_ tagihan TagihanId mtid
+          whereOpsional_ tagihan TagihanId    mtid
           orderBy [asc (minum ^. MinumId)]
           return (pengguna, meteran, tagihan, minum, tarif)
+
+selectRiwayatTagihan
+  :: ( PersistUniqueRead backend
+     , PersistQueryRead backend
+     , BackendCompatible SqlBackend backend
+     , MonadIO m
+     )
+  => Text
+  -> ReaderT backend m [(Entity Minum, Entity Tagihan, Entity Tarif)]
+selectRiwayatTagihan nometeran = do
+  select $ from $ \(meteran `InnerJoin` minum `InnerJoin` tagihan `InnerJoin` tarif) -> do
+    on $ tagihan ^. TagihanTarifId ==. tarif ^. TarifId
+    on $ minum ^. MinumId ==. tagihan ^. TagihanMinumId
+    on $ meteran ^. MeteranId ==. minum ^. MinumMeteranId
+    where_ $ meteran ^. MeteranNomor ==. val nometeran
+    orderBy [desc (minum ^. MinumTahun), desc (minum ^. MinumBulan)]
+    return (minum, tagihan, tarif)

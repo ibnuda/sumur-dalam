@@ -144,3 +144,20 @@ lihatDaftarTagihanPengguna admin nometeran = do
   _ <- kewenanganMinimalPengguna admin Admin
   _ <- meteranHarusAda nometeran
   runDb $ selectTagihanPengguna Nothing (Just nometeran)
+
+
+lihatRiwayatPelanggan
+  :: (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)
+  => Pengguna
+  -> Text
+  -> m
+       ( Entity Pengguna
+       , Entity Meteran
+       , [(Entity Minum, Entity Tagihan, Entity Tarif)]
+       )
+lihatRiwayatPelanggan admin nometeran = do
+  _                   <- kewenanganMinimalPengguna admin Admin
+  _                   <- meteranHarusAda nometeran
+  (pengguna, meteran) <- penggunaDanMeteran nometeran
+  daftartagihan       <- runDb $ selectRiwayatTagihan nometeran
+  return (pengguna, meteran, daftartagihan)

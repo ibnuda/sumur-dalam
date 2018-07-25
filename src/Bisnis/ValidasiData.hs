@@ -3,6 +3,7 @@ module Bisnis.ValidasiData
   ( penggunaAda
   , penggunaNil
   , penggunaPunyaMeteran
+  , penggunaDanMeteran
   , meteranHarusNyala
   , meteranHarusAda
   , meteranHarusNil
@@ -65,6 +66,16 @@ penggunaPunyaMeteran notelp = do
     []  -> throwError $ GagalPenggunaTunaMeteran
     x:_ -> return x
 
+penggunaDanMeteran
+  :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m)
+  => Text
+  -> m (Entity Pengguna, Entity Meteran)
+penggunaDanMeteran nometeran = do
+  pm <- runDb $ selectPenggunaMeteran nometeran
+  case pm of
+    []  -> throwError $ GagalMeteranNil nometeran
+    x:_ -> return x
+
 -- | Memeriksa apakah meteran dengan nomor meteran di parameter
 --   masih digunakan atau tidak.
 --   Akan melempar galat `GagalMeteranNil text` bila tidak ada.
@@ -95,9 +106,7 @@ meteranHarusAda nometeran = do
 --   ada pada sistem atau tidak.
 --   Akan melempar galat `GagalMeteranNil text` bila tidak ada.
 meteranHarusNil
-  :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m)
-  => Text
-  -> m ()
+  :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m) => Text -> m ()
 meteranHarusNil nometeran = do
   mmeteran <- runDb $ selectMeteran' nometeran
   case mmeteran of
