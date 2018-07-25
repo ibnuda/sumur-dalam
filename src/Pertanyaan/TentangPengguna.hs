@@ -3,7 +3,7 @@
 {-# LANGUAGE TypeFamilies     #-}
 module Pertanyaan.TentangPengguna where
 
-import           Protolude          hiding (from, on)
+import           Protolude          hiding (from, on, isNothing)
 
 import           Database.Esqueleto
 import           Data.Time
@@ -79,7 +79,7 @@ selectPenggunaMeteranDanCatatMinum tahun bulan = do
               (val $ True)
           ]
           (else_ $ val False)
-    where_ $ meteran ^. MeteranTanggalPutus ==. nothing
+    where_ $ isNothing $ meteran ^. MeteranTanggalPutus
     orderBy [desc (pengguna ^. PenggunaAlamat)]
     return (pengguna, meteran, sudahcatat (meteran ^. MeteranId))
 
