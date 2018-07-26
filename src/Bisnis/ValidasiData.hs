@@ -71,7 +71,7 @@ penggunaDanMeteran
   => Text
   -> m (Entity Pengguna, Entity Meteran)
 penggunaDanMeteran nometeran = do
-  pm <- runDb $ selectPenggunaMeteran nometeran
+  pm <- runDb $ selectPenggunaMeteran $ Just nometeran
   case pm of
     []  -> throwError $ GagalMeteranNil nometeran
     x:_ -> return x

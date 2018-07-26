@@ -4,6 +4,8 @@ module Penangan.Kasir where
 
 import           Protolude
 
+import           Database.Esqueleto
+
 import           Servant.Auth.Server
 
 import           Conf
@@ -12,6 +14,7 @@ import           Types
 import           Util
 
 import           Bisnis.PembukuanTagihan
+import           Bisnis.PembukuanPelanggan
 
 getDaftarDataTagihanPenangan
   :: MonadIO m
@@ -59,6 +62,22 @@ putBayarTagihanPenangan (Authenticated a) nometeran tahun bulan =
   unsextuple querytagihanKeResponse <$> bayarTagihan a nometeran tahun bulan
 putBayarTagihanPenangan _ _ _ _ =
   throwError $ GagalTakBerwenang "Lihat tagihan pengguna."
+
+getDaftarPelangganPenangan
+  :: MonadIO m
+  => AuthResult Pengguna
+  -> PenanganT m [ResponseDataPelanggan]
+getDaftarPelangganPenangan (Authenticated admin) =
+  map f <$> lihatDaftarPelanggan admin
+ where
+  f (Entity _ Pengguna {..}, Entity _ Meteran {..}) = ResponseDataPelanggan
+    penggunaNama
+    penggunaNomorTelp
+    penggunaAlamat
+    penggunaWilayah
+    meteranNomor
+getDaftarPelangganPenangan _ =
+  throwError $ GagalTakBerwenang "Lihat daftar pelanggan."
 
 getRiwayatPelangganPenangan
   :: MonadIO m

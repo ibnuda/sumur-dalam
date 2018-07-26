@@ -32,6 +32,8 @@ type PembayaranApi =
     :> Capture "bulan" Int
     :> PutNoContent '[ JSON] ResponseDataTagihan
   :<|> "pelanggan"
+    :> Get '[ JSON] [ResponseDataPelanggan]
+  :<|> "pelanggan"
     :> Capture "nometeran" Text
     :> Get '[ JSON] ResponseRiwayatPelanggan
 
@@ -46,6 +48,7 @@ pembayaranApi a =
     :<|> getDaftarTagihanPenggunaPenangan a
     :<|> getTagihanPenggunaTahunBulanPenangan a
     :<|> putBayarTagihanPenangan a
+    :<|> getDaftarPelangganPenangan a
     :<|> getRiwayatPelangganPenangan a
 
 pembayaranServer :: Konfigurasi -> AuthResult Pengguna -> Server PembayaranApi

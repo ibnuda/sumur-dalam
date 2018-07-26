@@ -3,6 +3,7 @@
 module Bisnis.PembukuanPelanggan
   ( lihatPenggunaDanMeteran
   , tambahPengguna
+  , lihatDaftarPelanggan
   ) where
 
 import           Protolude
@@ -54,7 +55,15 @@ tambahPengguna admin nama telp pw alamat wilayah nometeran = do
   x <- runDb $ do
     Entity pid _   <- insertPengguna nama telp pw Pelanggan alamat wilayah
     Entity _   met <- insertMeteran pid nometeran h
-    selectPenggunaMeteran $ meteranNomor met
+    selectPenggunaMeteran $ Just $ meteranNomor met
   case x of
     []  -> throwError $ GagalDB "meteran tidak ada" "saat masukkan pengguna"
     y:_ -> return y
+
+lihatDaftarPelanggan
+  :: (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)
+  => Pengguna
+  -> m [(Entity Pengguna, Entity Meteran)]
+lihatDaftarPelanggan admin = do
+  _ <- kewenanganMinimalPengguna admin Admin
+  runDb $ selectPenggunaMeteran Nothing

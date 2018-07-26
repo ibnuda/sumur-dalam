@@ -38,7 +38,7 @@ petugasProxy = Proxy
 petugasApi
   :: MonadIO m => AuthResult Pengguna -> ServerT PetugasApi (PenanganT m)
 petugasApi a =
-  getDaftarPelangganPenangan a
+  getDaftarMinumPelangganPenangan a
     :<|> getMinumPelangganPenangan a
     :<|> postCatatAirPenangan a
     :<|> putCatatAirPenangan a

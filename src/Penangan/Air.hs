@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards  #-}
 module Penangan.Air
-  ( getDaftarPelangganPenangan
+  ( getDaftarMinumPelangganPenangan
   , getMinumPelangganPenangan
   , postCatatAirPenangan
   , putCatatAirPenangan
@@ -19,9 +19,9 @@ import           Util
 import           Bisnis.PembukuanAir
 import           Bisnis.PembukuanPelanggan
 
-getDaftarPelangganPenangan
+getDaftarMinumPelangganPenangan
   :: MonadIO m => AuthResult Pengguna -> PenanganT m [ResponseDaftarPelanggan]
-getDaftarPelangganPenangan (Authenticated petugas) = map f
+getDaftarMinumPelangganPenangan (Authenticated petugas) = map f
   <$> lihatPenggunaDanMeteran petugas
  where
   f (Pengguna {..}, Meteran {..}, tercatat) = ResponseDaftarPelanggan
@@ -30,7 +30,7 @@ getDaftarPelangganPenangan (Authenticated petugas) = map f
     meteranNomor
     penggunaAlamat
     tercatat
-getDaftarPelangganPenangan _ =
+getDaftarMinumPelangganPenangan _ =
   throwError $ GagalTakBerwenang "Tidak boleh melihat daftar pelanggan."
 
 getMinumPelangganPenangan

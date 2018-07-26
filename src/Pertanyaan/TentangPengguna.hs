@@ -89,12 +89,12 @@ selectPenggunaMeteran
      , BackendCompatible SqlBackend backend
      , MonadIO m
      )
-  => Text
+  => Maybe Text
   -> ReaderT backend m [(Entity Pengguna, Entity Meteran)]
-selectPenggunaMeteran nometeran = do
+selectPenggunaMeteran mnometeran = do
   select $ from $ \(pengguna `InnerJoin` meteran) -> do
     on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
-    where_ $ meteran ^. MeteranNomor ==. val nometeran
+    whereOpsional_  meteran MeteranNomor mnometeran
     return (pengguna, meteran)
 
 insertMeteran
