@@ -153,7 +153,7 @@ lihatRiwayatPelanggan
   -> m
        ( Entity Pengguna
        , Entity Meteran
-       , [(Entity Minum, Entity Tagihan, Entity Tarif)]
+       , [(Entity Minum, Value (Maybe Day))]
        )
 lihatRiwayatPelanggan admin nometeran = do
   _                   <- kewenanganMinimalPengguna admin Admin

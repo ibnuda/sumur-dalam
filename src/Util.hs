@@ -8,13 +8,10 @@ import           Crypto.BCrypt
 import           Crypto.JOSE
 
 import qualified Data.ByteString       as B
-import qualified Data.ByteString.Char8 as BC (pack)
 import qualified Data.ByteString.Lazy  as BL
-import           Data.Text             (unpack)
+import           Data.Time
 
 import           Database.Esqueleto
-
-import           Data.Time.Clock
 
 import           Servant.Auth.Server
 
@@ -24,8 +21,7 @@ import           Types
 
 buatPassword :: Text -> IO Text
 buatPassword password = do
-  mpass <- hashPasswordUsingPolicy slowerBcryptHashingPolicy $ BC.pack $ unpack
-    password
+  mpass <- hashPasswordUsingPolicy slowerBcryptHashingPolicy $ encodeUtf8 password
   case mpass of
     Nothing -> buatPassword password
     Just pa -> return $ decodeUtf8 pa
@@ -117,7 +113,7 @@ querytagihanpenggunaKeResponse ((p, m, t, mi, ta):(p', m', t', mi', ta'):xs) =
 queryriwayatKeResponse
   :: Entity Pengguna
   -> Entity Meteran
-  -> [(Entity Minum, Entity Tagihan, Entity Tarif)]
+  -> [(Entity Minum, Value (Maybe Day))]
   -> ResponseRiwayatPelanggan
 queryriwayatKeResponse p m ts =
   let Pengguna {..} = entityVal p
@@ -131,30 +127,26 @@ queryriwayatKeResponse p m ts =
                                (querytagihansimpleKeResponse ts)
 
 querytagihansimpleKeResponse
-  :: [(Entity Minum, Entity Tagihan, Entity Tarif)] -> [ResponseTagihanSimple]
+  :: [(Entity Minum, Value (Maybe Day))] -> [ResponseTagihanSimple]
 querytagihansimpleKeResponse [] = []
-querytagihansimpleKeResponse [(m, tag, tar)] =
+querytagihansimpleKeResponse [(m, tag)] =
   let Minum {..}   = entityVal m
-      Tagihan {..} = entityVal tag
-      tarif        = entityVal tar
+      tanggalbayar = unValue tag
   in  [ ResponseTagihanSimple minumTahun
                               minumBulan
-                              (tarifKeResponse tarif)
                               0
                               minumSampai
-                              tagihanTanggalBayar
+                              tanggalbayar
       ]
-querytagihansimpleKeResponse ((m, tag, tar):x@(m', _, _):xs) =
+querytagihansimpleKeResponse ((m, tag):x@(m', _):xs) =
   let minum        = entityVal m
-      Tagihan {..} = entityVal tag
+      tanggalbayar = unValue tag
       minumlalu    = minumSampai (entityVal m')
-      tarif        = entityVal tar
   in  ( ResponseTagihanSimple (minumTahun minum)
                               (minumBulan minum)
-                              (tarifKeResponse tarif)
                               minumlalu
                               (minumSampai minum)
-                              tagihanTanggalBayar
+                              tanggalbayar
       )
         : querytagihansimpleKeResponse (x : xs)
 

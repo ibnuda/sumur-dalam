@@ -121,17 +121,16 @@ selectTagihanPengguna mtid mnometeran = do
 
 selectRiwayatTagihan
   :: ( PersistUniqueRead backend
-     , PersistQueryRead backend
-     , BackendCompatible SqlBackend backend
-     , MonadIO m
-     )
+    , PersistQueryRead backend
+    , BackendCompatible SqlBackend backend
+    , MonadIO m
+    )
   => Text
-  -> ReaderT backend m [(Entity Minum, Entity Tagihan, Entity Tarif)]
+  -> ReaderT backend m [(Entity Minum, Value (Maybe Day))]
 selectRiwayatTagihan nometeran = do
-  select $ from $ \(meteran `InnerJoin` minum `InnerJoin` tagihan `InnerJoin` tarif) -> do
-    on $ tagihan ^. TagihanTarifId ==. tarif ^. TarifId
+  select $ from $ \(meteran `InnerJoin` minum `InnerJoin` tagihan) -> do
     on $ minum ^. MinumId ==. tagihan ^. TagihanMinumId
     on $ meteran ^. MeteranId ==. minum ^. MinumMeteranId
     where_ $ meteran ^. MeteranNomor ==. val nometeran
     orderBy [desc (minum ^. MinumTahun), desc (minum ^. MinumBulan)]
-    return (minum, tagihan, tarif)
+    return (minum, tagihan ^. TagihanTanggalBayar)

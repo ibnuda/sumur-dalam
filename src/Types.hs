@@ -139,7 +139,6 @@ instance ToJSON ResponseDataTagihan where
 data ResponseTagihanSimple = ResponseTagihanSimple
   { rtsTahun         :: Int64
   , rtsBulan         :: Int
-  , rtsTarif         :: ResponseDataTagihanTarif
   , rtsMinumLalu     :: Int64
   , rtsMinumSekarang :: Int64
   , rtsTanggalBayar  :: Maybe Day

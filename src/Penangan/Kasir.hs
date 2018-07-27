@@ -84,7 +84,7 @@ getRiwayatPelangganPenangan
   => AuthResult Pengguna -- ^ Hasil otentikasi.
   -> Text -- ^ Nomor meteran.
   -> PenanganT m ResponseRiwayatPelanggan
-getRiwayatPelangganPenangan (Authenticated a) nomet = do
+getRiwayatPelangganPenangan (Authenticated a) nomet =
   untriple queryriwayatKeResponse <$> lihatRiwayatPelanggan a nomet
 getRiwayatPelangganPenangan _ _ =
   throwError $ GagalTakBerwenang "Lihat riwayat pengguna."
