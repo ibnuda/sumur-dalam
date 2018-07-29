@@ -36,7 +36,8 @@ type PembayaranApi =
   :<|> "pelanggan"
     :> Capture "nometeran" Text
     :> Get '[ JSON] ResponseRiwayatPelanggan
-
+  :<|> "ikhtisar"
+    :> Get '[ JSON] ResponseIkhtisar
 
 pembayaranProxy :: Proxy PembayaranApi
 pembayaranProxy = Proxy
@@ -50,6 +51,7 @@ pembayaranApi a =
     :<|> putBayarTagihanPenangan a
     :<|> getDaftarPelangganPenangan a
     :<|> getRiwayatPelangganPenangan a
+    :<|> getIkhtisarPenangan a
 
 pembayaranServer :: Konfigurasi -> AuthResult Pengguna -> Server PembayaranApi
 pembayaranServer c a =

@@ -13,6 +13,7 @@ import           Model
 import           Types
 import           Util
 
+import           Bisnis.LainLain
 import           Bisnis.PembukuanTagihan
 import           Bisnis.PembukuanPelanggan
 
@@ -64,11 +65,9 @@ putBayarTagihanPenangan _ _ _ _ =
   throwError $ GagalTakBerwenang "Lihat tagihan pengguna."
 
 getDaftarPelangganPenangan
-  :: MonadIO m
-  => AuthResult Pengguna
-  -> PenanganT m [ResponseDataPelanggan]
-getDaftarPelangganPenangan (Authenticated admin) =
-  map f <$> lihatDaftarPelanggan admin
+  :: MonadIO m => AuthResult Pengguna -> PenanganT m [ResponseDataPelanggan]
+getDaftarPelangganPenangan (Authenticated admin) = map f
+  <$> lihatDaftarPelanggan admin
  where
   f (Entity _ Pengguna {..}, Entity _ Meteran {..}) = ResponseDataPelanggan
     penggunaNama
@@ -88,3 +87,11 @@ getRiwayatPelangganPenangan (Authenticated a) nomet =
   untriple queryriwayatKeResponse <$> lihatRiwayatPelanggan a nomet
 getRiwayatPelangganPenangan _ _ =
   throwError $ GagalTakBerwenang "Lihat riwayat pengguna."
+
+getIkhtisarPenangan
+  :: MonadIO m
+  => AuthResult Pengguna
+  -> PenanganT m ResponseIkhtisar
+getIkhtisarPenangan (Authenticated admin) = f <$> lihatIkhtisar admin
+  where f (a, b, c, d) = ResponseIkhtisar a b c (tarifKeResponse d)
+getIkhtisarPenangan _ = panic ""

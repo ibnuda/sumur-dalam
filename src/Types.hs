@@ -158,6 +158,15 @@ data ResponseRiwayatPelanggan = ResponseRiwayatPelanggan
 instance ToJSON ResponseRiwayatPelanggan where
   toJSON = genericToJSON omitsnake
 
+data ResponseIkhtisar = ResponseIkhtisar
+  { riJumlahPelanggan :: Int64
+  , riJumlahTagihan   :: Int64
+  , riTagihanBayar    :: Int64
+  , riTarif           :: ResponseDataTagihanTarif
+  } deriving (Generic)
+instance ToJSON ResponseIkhtisar where
+  toJSON = genericToJSON omitsnake
+
 data Gagal
   = GagalMasuk
   | GagalAdminNil Int64
