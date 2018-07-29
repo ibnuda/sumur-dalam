@@ -33,6 +33,17 @@ data RequestCatatAir = RequestCatatAir
 instance FromJSON RequestCatatAir where
   parseJSON = genericParseJSON omitsnake
 
+data RequestTarifBaru = RequestTarifBaru
+  { rtbAwalHarga    :: Int64
+  , rtbAwalSampai   :: Int64
+  , rtbTengahHarga  :: Int64
+  , rtbTengahSampai :: Int64
+  , rtbAkhirHarga   :: Int64
+  , rtbBiayaBeban   :: Int64
+  } deriving (Generic)
+instance FromJSON RequestTarifBaru where
+  parseJSON = genericParseJSON omitsnake
+
 data RequestPelangganBaru = RequestPelangganBaru
   { rpbNama         :: Text
   , rpbNomorTelepon :: Text
@@ -97,17 +108,28 @@ data ResponseDataTagihanMeteran = ResponseDataTagihanMeteran
 instance ToJSON ResponseDataTagihanMeteran where
   toJSON = genericToJSON omitsnake
 
-data ResponseDataTagihanTarifItem = ResponseDataTagihanTarifItem
-  { rdttiMulai  :: Int64
-  , rdttiSampai :: Maybe Int64
-  , rdttiHarga  :: Int64
-  } deriving (Generic)
-instance ToJSON ResponseDataTagihanTarifItem where
-  toJSON = genericToJSON omitsnake
+--data ResponseDataTagihanTarifItem = ResponseDataTagihanTarifItem
+--  { rdttiMulai  :: Int64
+--  , rdttiSampai :: Maybe Int64
+--  , rdttiHarga  :: Int64
+--  } deriving (Generic)
+--instance ToJSON ResponseDataTagihanTarifItem where
+--  toJSON = genericToJSON omitsnake
+
+--data ResponseDataTagihanTarif = ResponseDataTagihanTarif
+--  { rdttSatuan     :: [ResponseDataTagihanTarifItem]
+--  , rdttBiayaBeban :: Int64
+--  } deriving (Generic)
+--instance ToJSON ResponseDataTagihanTarif where
+--  toJSON = genericToJSON omitsnake
 
 data ResponseDataTagihanTarif = ResponseDataTagihanTarif
-  { rdttSatuan     :: [ResponseDataTagihanTarifItem]
-  , rdttBiayaBeban :: Int64
+  { rtdHargaAwal    :: Int64
+  , rtdSampaiAwal   :: Int64
+  , rtdHargaTengah  :: Int64
+  , rtdSampaiTengah :: Int64
+  , rtdHargaAkhir   :: Int64
+  , rtdBiayaBeban   :: Int64
   } deriving (Generic)
 instance ToJSON ResponseDataTagihanTarif where
   toJSON = genericToJSON omitsnake

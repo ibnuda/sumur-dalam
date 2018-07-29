@@ -7,8 +7,8 @@ import           Protolude
 import           Crypto.BCrypt
 import           Crypto.JOSE
 
-import qualified Data.ByteString       as B
-import qualified Data.ByteString.Lazy  as BL
+import qualified Data.ByteString      as B
+import qualified Data.ByteString.Lazy as BL
 import           Data.Time
 
 import           Database.Esqueleto
@@ -21,7 +21,8 @@ import           Types
 
 buatPassword :: Text -> IO Text
 buatPassword password = do
-  mpass <- hashPasswordUsingPolicy slowerBcryptHashingPolicy $ encodeUtf8 password
+  mpass <- hashPasswordUsingPolicy slowerBcryptHashingPolicy
+    $ encodeUtf8 password
   case mpass of
     Nothing -> buatPassword password
     Just pa -> return $ decodeUtf8 pa
@@ -55,15 +56,12 @@ unsextuple
 unsextuple f (a, b, c, d, e, f') = f a b c d e f'
 
 tarifKeResponse :: Tarif -> ResponseDataTagihanTarif
-tarifKeResponse Tarif {..} =
-  let itemawal =
-        ResponseDataTagihanTarifItem 0 (Just tarifSampaiAwal) tarifHargaAwal
-      itemteng = ResponseDataTagihanTarifItem tarifSampaiAwal
-                                              (Just tarifSampaiTengah)
-                                              tarifHargaTengah
-      itemakhi =
-        ResponseDataTagihanTarifItem tarifSampaiTengah Nothing tarifHargaAkhir
-  in  ResponseDataTagihanTarif [itemawal, itemteng, itemakhi] tarifBiayaBeban
+tarifKeResponse Tarif {..} = ResponseDataTagihanTarif tarifHargaAwal
+                                                      tarifSampaiAwal
+                                                      tarifHargaTengah
+                                                      tarifSampaiTengah
+                                                      tarifHargaAkhir
+                                                      tarifBiayaBeban
 
 penggunaMeteranKeResponse
   :: Entity Pengguna -> Entity Meteran -> ResponseDataTagihanPengguna
@@ -105,10 +103,10 @@ querytagihanpenggunaKeResponse
 querytagihanpenggunaKeResponse [] = []
 querytagihanpenggunaKeResponse [(p, m, t, mi, ta)] =
   [querytagihanKeResponse p m t mi ta (Value 0)]
-querytagihanpenggunaKeResponse ((p, m, t, mi, ta):(p', m', t', mi', ta'):xs) =
-  let lalu = minumSampai $ entityVal mi'
-  in  querytagihanKeResponse p m t mi ta (Value lalu)
-        : querytagihanpenggunaKeResponse ((p', m', t', mi', ta') : xs)
+querytagihanpenggunaKeResponse ((p, m, t, mi, ta) : (p', m', t', mi', ta') : xs)
+  = let lalu = minumSampai $ entityVal mi'
+    in  querytagihanKeResponse p m t mi ta (Value lalu)
+          : querytagihanpenggunaKeResponse ((p', m', t', mi', ta') : xs)
 
 queryriwayatKeResponse
   :: Entity Pengguna
@@ -132,21 +130,16 @@ querytagihansimpleKeResponse [] = []
 querytagihansimpleKeResponse [(m, tag)] =
   let Minum {..}   = entityVal m
       tanggalbayar = unValue tag
-  in  [ ResponseTagihanSimple minumTahun
-                              minumBulan
-                              0
-                              minumSampai
-                              tanggalbayar
-      ]
-querytagihansimpleKeResponse ((m, tag):x@(m', _):xs) =
+  in  [ResponseTagihanSimple minumTahun minumBulan 0 minumSampai tanggalbayar]
+querytagihansimpleKeResponse ((m, tag) : x@(m', _) : xs) =
   let minum        = entityVal m
       tanggalbayar = unValue tag
       minumlalu    = minumSampai (entityVal m')
-  in  ( ResponseTagihanSimple (minumTahun minum)
-                              (minumBulan minum)
-                              minumlalu
-                              (minumSampai minum)
-                              tanggalbayar
+  in  (ResponseTagihanSimple (minumTahun minum)
+                             (minumBulan minum)
+                             minumlalu
+                             (minumSampai minum)
+                             tanggalbayar
       )
         : querytagihansimpleKeResponse (x : xs)
 

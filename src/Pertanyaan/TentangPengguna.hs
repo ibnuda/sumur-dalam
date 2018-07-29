@@ -70,7 +70,7 @@ selectPenggunaMeteranDanCatatMinum tahun bulan = do
     on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
     let sudahcatat mid = case_
           [ when_
-              ( exists $ from $ \m -> do
+              (exists $ from $ \m -> do
                 where_ $ m ^. MinumTahun ==. val (fromInteger tahun)
                 where_ $ m ^. MinumBulan ==. val bulan
                 where_ $ m ^. MinumMeteranId ==. mid
@@ -94,7 +94,7 @@ selectPenggunaMeteran
 selectPenggunaMeteran mnometeran = do
   select $ from $ \(pengguna `InnerJoin` meteran) -> do
     on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
-    whereOpsional_  meteran MeteranNomor mnometeran
+    whereOpsional_ meteran MeteranNomor mnometeran
     return (pengguna, meteran)
 
 insertMeteran

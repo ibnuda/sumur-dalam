@@ -83,8 +83,8 @@ bayarTagihan admin nometeran tahun bulan = do
                                     (fromInteger tlalu)
                                     blalu
   case tagihan of
-    []  -> throwError $ GagalTagihanTahunBulanNil tini bini
-    x:_ -> return x
+    []    -> throwError $ GagalTagihanTahunBulanNil tini bini
+    x : _ -> return x
 
 -- | Melihat tagihan dari meteran dengan nomor
 --   sesuai dengan parameter kedua.
@@ -121,8 +121,8 @@ lihatTagihanPengguna admin nometeran tahun bulan = do
                                                             (fromInteger tlalu)
                                                             blalu
   case tagihan of
-    []  -> throwError $ GagalTagihanTahunBulanNil tini bini
-    x:_ -> return x
+    []    -> throwError $ GagalTagihanTahunBulanNil tini bini
+    x : _ -> return x
 
 -- | Melihat daftar tagihan pengguna dengan nomor meteran pada
 --   parameter kedua.

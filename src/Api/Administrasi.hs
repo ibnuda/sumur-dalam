@@ -15,7 +15,10 @@ import           Penangan.Sistem
 
 type AdministrasiApi =
   "tarif"
-    :> Get '[ JSON] ResponseDataTagihanTarif
+    :> Get '[ JSON] [ResponseDataTagihanTarif]
+  :<|> "tarif"
+    :> ReqBody '[ JSON] RequestTarifBaru
+    :> Post '[ JSON] ResponseDataTagihanTarif
   :<|> "tambah"
     :> ReqBody '[ JSON] RequestPelangganBaru
     :> Get '[ JSON] ResponseDataPelanggan
@@ -31,6 +34,7 @@ administrasiApi
   :: MonadIO m => AuthResult Pengguna -> ServerT AdministrasiApi (PenanganT m)
 administrasiApi a =
   getTarifTerbaruPenangan a
+    :<|> postTambahTarifPenangan a
     :<|> postTambahPelangganPenangan a
     :<|> putGantiPassword a
 

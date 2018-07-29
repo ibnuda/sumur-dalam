@@ -89,9 +89,7 @@ getRiwayatPelangganPenangan _ _ =
   throwError $ GagalTakBerwenang "Lihat riwayat pengguna."
 
 getIkhtisarPenangan
-  :: MonadIO m
-  => AuthResult Pengguna
-  -> PenanganT m ResponseIkhtisar
+  :: MonadIO m => AuthResult Pengguna -> PenanganT m ResponseIkhtisar
 getIkhtisarPenangan (Authenticated admin) = f <$> lihatIkhtisar admin
   where f (a, b, c, d) = ResponseIkhtisar a b c (tarifKeResponse d)
 getIkhtisarPenangan _ = panic ""

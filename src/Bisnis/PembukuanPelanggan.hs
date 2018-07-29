@@ -57,8 +57,8 @@ tambahPengguna admin nama telp pw alamat wilayah nometeran = do
     Entity _   met <- insertMeteran pid nometeran h
     selectPenggunaMeteran $ Just $ meteranNomor met
   case x of
-    []  -> throwError $ GagalDB "meteran tidak ada" "saat masukkan pengguna"
-    y:_ -> return y
+    []    -> throwError $ GagalDB "meteran tidak ada" "saat masukkan pengguna"
+    y : _ -> return y
 
 lihatDaftarPelanggan
   :: (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)

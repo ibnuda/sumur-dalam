@@ -10,18 +10,22 @@ import           Database.Esqueleto
 import           Model
 import           Model.Grouping
 
-selectTarifTerbaru
+selectTarif
   :: ( PersistUniqueRead b
      , PersistQueryRead b
      , BackendCompatible SqlBackend b
      , MonadIO m
      )
-  => ReaderT b m [Entity Tarif]
-selectTarifTerbaru = do
+  => Maybe Int64
+  -> ReaderT b m [Entity Tarif]
+selectTarif lim = do
   select $ from $ \tarif -> do
     orderBy [desc (tarif ^. TarifId)]
-    limit 1
+    limitMaybe lim
     return tarif
+ where
+  limitMaybe Nothing  = return ()
+  limitMaybe (Just x) = limit x
 
 insertGrup
   :: (BaseBackend backend ~ SqlBackend, PersistStoreWrite backend, MonadIO m)
@@ -37,8 +41,8 @@ insertTarif
   -> Int64
   -> Int64
   -> Int64
-  -> ReaderT backend m (Key Tarif)
-insertTarif a b c d e f = insert $ Tarif a b c d e f
+  -> ReaderT backend m (Entity Tarif)
+insertTarif a b c d e f = insertEntity $ Tarif a b c d e f
 
 selectJumlahPelanggan
   :: ( PersistUniqueRead b

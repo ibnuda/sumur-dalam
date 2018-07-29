@@ -63,8 +63,8 @@ penggunaPunyaMeteran
 penggunaPunyaMeteran notelp = do
   meteran <- runDb $ selectMeteranPengguna notelp
   case meteran of
-    []  -> throwError $ GagalPenggunaTunaMeteran
-    x:_ -> return x
+    []    -> throwError $ GagalPenggunaTunaMeteran
+    x : _ -> return x
 
 penggunaDanMeteran
   :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m)
@@ -73,8 +73,8 @@ penggunaDanMeteran
 penggunaDanMeteran nometeran = do
   pm <- runDb $ selectPenggunaMeteran $ Just nometeran
   case pm of
-    []  -> throwError $ GagalMeteranNil nometeran
-    x:_ -> return x
+    []    -> throwError $ GagalMeteranNil nometeran
+    x : _ -> return x
 
 -- | Memeriksa apakah meteran dengan nomor meteran di parameter
 --   masih digunakan atau tidak.
@@ -86,8 +86,8 @@ meteranHarusNyala
 meteranHarusNyala nometeran = do
   mmeteran <- runDb $ selectMeteran nometeran
   case mmeteran of
-    []  -> throwError $ GagalMeteranNil nometeran
-    x:_ -> return x
+    []    -> throwError $ GagalMeteranNil nometeran
+    x : _ -> return x
 
 -- | Memeriksa apakah meteran dengan nomor meteran di parameter
 --   ada pada sistem atau tidak.
@@ -99,8 +99,8 @@ meteranHarusAda
 meteranHarusAda nometeran = do
   mmeteran <- runDb $ selectMeteran' nometeran
   case mmeteran of
-    []  -> throwError $ GagalMeteranNil nometeran
-    x:_ -> return x
+    []    -> throwError $ GagalMeteranNil nometeran
+    x : _ -> return x
 
 -- | Memeriksa apakah meteran dengan nomor meteran di parameter
 --   ada pada sistem atau tidak.
@@ -118,10 +118,10 @@ tarifTerbaru
   :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m)
   => m (Entity Tarif)
 tarifTerbaru = do
-  tarif <- runDb selectTarifTerbaru
+  tarif <- runDb $ selectTarif $ Just 1
   case tarif of
-    []  -> throwError GagalTarifKosong
-    x:_ -> return x
+    []    -> throwError GagalTarifKosong
+    x : _ -> return x
 
 -- | Memastikan bahwa `Meteran` dengan nomor meteran di parameter
 --   belum memiliki dicatat penggunaannya pada tahun dan bulan
@@ -150,8 +150,8 @@ meteranBulanIniHarusIsi
 meteranBulanIniHarusIsi nometeran tahun bulan = do
   minum <- runDb $ selectMinumByNomorMeteran nometeran (Just tahun) (Just bulan)
   case minum of
-    []  -> throwError $ GagalMinumNil nometeran
-    x:_ -> return x
+    []    -> throwError $ GagalMinumNil nometeran
+    x : _ -> return x
 
 -- | Memastikan bahwa tanggal dan bulan yang diinput oleh pengguna
 --   sudah lampau atau bukan merupakan tanggal yang valid.
@@ -194,5 +194,5 @@ tagihanAda
 tagihanAda nometeran tahun bulan = do
   tagihan <- runDb $ selectTagihan nometeran tahun bulan
   case tagihan of
-    []  -> throwError $ GagalTagihanNil nometeran tahun bulan
-    x:_ -> return x
+    []    -> throwError $ GagalTagihanNil nometeran tahun bulan
+    x : _ -> return x

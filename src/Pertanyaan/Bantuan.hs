@@ -36,13 +36,13 @@ minumDiTahunBulan
   -> SqlExpr (Value Int64)
 minumDiTahunBulan meteranid tahun bulan = case_
   [ when_
-      ( exists $ from $ \minum -> do
+      (exists $ from $ \minum -> do
         where_ $ minum ^. MinumMeteranId ==. meteranid
         where_ $ minum ^. MinumTahun ==. tahun
         where_ $ minum ^. MinumBulan ==. bulan
       )
       then_
-      ( sub_select $ from $ \minum -> do
+      (sub_select $ from $ \minum -> do
         where_ $ minum ^. MinumMeteranId ==. meteranid
         where_ $ minum ^. MinumTahun ==. tahun
         where_ $ minum ^. MinumBulan ==. bulan

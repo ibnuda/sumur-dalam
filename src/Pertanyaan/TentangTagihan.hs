@@ -33,14 +33,15 @@ selectTagihan
 selectTagihan nometeran tahun bulan = do
   select
     $ from
-    $ \(pengguna `InnerJoin` meteran `InnerJoin` minum `InnerJoin` tagihan) -> do
-        on $ minum ^. MinumId ==. tagihan ^. TagihanMinumId
-        on $ meteran ^. MeteranId ==. minum ^. MinumMeteranId
-        on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
-        where_ $ meteran ^. MeteranNomor ==. val nometeran
-        where_ $ minum ^. MinumTahun ==. val tahun
-        where_ $ minum ^. MinumBulan ==. val bulan
-        return tagihan
+    $ \(pengguna `InnerJoin` meteran `InnerJoin` minum `InnerJoin` tagihan) ->
+        do
+          on $ minum ^. MinumId ==. tagihan ^. TagihanMinumId
+          on $ meteran ^. MeteranId ==. minum ^. MinumMeteranId
+          on $ pengguna ^. PenggunaId ==. meteran ^. MeteranPenggunaId
+          where_ $ meteran ^. MeteranNomor ==. val nometeran
+          where_ $ minum ^. MinumTahun ==. val tahun
+          where_ $ minum ^. MinumBulan ==. val bulan
+          return tagihan
 
 updateTagihan :: MonadIO m => Key Tagihan -> Day -> ReaderT SqlBackend m ()
 updateTagihan tid h = do
@@ -121,10 +122,10 @@ selectTagihanPengguna mtid mnometeran = do
 
 selectRiwayatTagihan
   :: ( PersistUniqueRead backend
-    , PersistQueryRead backend
-    , BackendCompatible SqlBackend backend
-    , MonadIO m
-    )
+     , PersistQueryRead backend
+     , BackendCompatible SqlBackend backend
+     , MonadIO m
+     )
   => Text
   -> ReaderT backend m [(Entity Minum, Value (Maybe Day))]
 selectRiwayatTagihan nometeran = do

@@ -14,14 +14,32 @@ import           Types
 import           Util
 
 import           Bisnis.LainLain
-import           Bisnis.PembukuanPelanggan
 import           Bisnis.Otoritas
+import           Bisnis.PembukuanPelanggan
 
 getTarifTerbaruPenangan
-  :: MonadIO m => AuthResult Pengguna -> PenanganT m ResponseDataTagihanTarif
+  :: MonadIO m => AuthResult Pengguna -> PenanganT m [ResponseDataTagihanTarif]
 getTarifTerbaruPenangan (Authenticated x) = do
-  tarifKeResponse <$> lihatTarifTerbaru x
+  map tarifKeResponse <$> lihatDaftarTarif x
 getTarifTerbaruPenangan _ = throwError $ GagalTakBerwenang "Tidak boleh lihat."
+
+postTambahTarifPenangan
+  :: MonadIO m
+  => AuthResult Pengguna
+  -> RequestTarifBaru
+  -> PenanganT m ResponseDataTagihanTarif
+postTambahTarifPenangan (Authenticated admin) RequestTarifBaru {..} = do
+  f
+    <$> tambahTarif admin
+                    rtbAwalHarga
+                    rtbAwalSampai
+                    rtbTengahHarga
+                    rtbTengahSampai
+                    rtbAkhirHarga
+                    rtbBiayaBeban
+  where f (Entity _ tarif) = tarifKeResponse tarif
+postTambahTarifPenangan _ _ =
+  throwError $ GagalTakBerwenang "Tidak boleh lihat."
 
 postTambahPelangganPenangan
   :: MonadIO m

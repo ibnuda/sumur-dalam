@@ -98,7 +98,7 @@ gantiPassword Pengguna {..} passlama passbaru = do
                    Nothing
     selectPenggunaByNomorTelepon penggunaNomorTelp
   case pengguna of
-    []  -> throwError $ GagalDB "Ganti password" "Pengguna tidak ada."
-    x:_ -> do
+    []    -> throwError $ GagalDB "Ganti password" "Pengguna tidak ada."
+    x : _ -> do
       token <- buatToken $ entityVal x
       return (entityVal x, token)
