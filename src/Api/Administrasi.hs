@@ -21,7 +21,7 @@ type AdministrasiApi =
     :> Post '[ JSON] ResponseDataTagihanTarif
   :<|> "tambah"
     :> ReqBody '[ JSON] RequestPelangganBaru
-    :> Get '[ JSON] ResponseDataPelanggan
+    :> Post '[ JSON] ResponseDataPelanggan
   :<|> "gantipass"
     :> ReqBody '[ JSON] RequestGantiPassword
     :> Put '[ JSON] ResponseDataPelangganToken
