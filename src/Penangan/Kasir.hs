@@ -58,10 +58,11 @@ putBayarTagihanPenangan
   -> Text -- ^ Nomor meteran.
   -> Integer -- ^ Tahun tagihan.
   -> Int -- ^ Bulan tagihan.
+  -> RequestBayarTagihan
   -> PenanganT m ResponseDataTagihan
-putBayarTagihanPenangan (Authenticated a) nometeran tahun bulan =
+putBayarTagihanPenangan (Authenticated a) nometeran tahun bulan _ =
   unsextuple querytagihanKeResponse <$> bayarTagihan a nometeran tahun bulan
-putBayarTagihanPenangan _ _ _ _ =
+putBayarTagihanPenangan _ _ _ _ _ =
   throwError $ GagalTakBerwenang "Lihat tagihan pengguna."
 
 getDaftarPelangganPenangan

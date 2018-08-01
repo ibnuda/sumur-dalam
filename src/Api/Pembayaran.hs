@@ -30,7 +30,8 @@ type PembayaranApi =
     :> Capture "nometeran" Text
     :> Capture "tahun" Integer
     :> Capture "bulan" Int
-    :> PutNoContent '[ JSON] ResponseDataTagihan
+    :> ReqBody '[ JSON] RequestBayarTagihan
+    :> Put '[ JSON] ResponseDataTagihan
   :<|> "pelanggan"
     :> Get '[ JSON] [ResponseDataPelanggan]
   :<|> "pelanggan"
