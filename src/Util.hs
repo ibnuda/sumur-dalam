@@ -78,7 +78,7 @@ querytagihanKeResponse
   -> Entity Tagihan
   -> Entity Minum
   -> Entity Tarif
-  -> Value Int64
+  -> Value Int
   -> ResponseDataTagihan
 querytagihanKeResponse pengguna meteran tagihan minum tarif (Value lalu) =
   ResponseDataTagihan (fromSqlKey $ entityKey tagihan)
@@ -142,6 +142,19 @@ querytagihansimpleKeResponse ((m, tag) : x@(m', _) : xs) =
                              tanggalbayar
       )
         : querytagihansimpleKeResponse (x : xs)
+
+semuaminumKeResponse
+  :: [(Value Int, Value Int, Value (Maybe Rational))] -> [ResponseMinumPerBulan]
+semuaminumKeResponse []  = []
+semuaminumKeResponse [a] = [minumKeResponse a]
+semuaminumKeResponse (a : b : xs) =
+  (minumKeResponse a - minumKeResponse b) : semuaminumKeResponse (b : xs)
+
+minumKeResponse
+  :: (Value Int, Value Int, Value (Maybe Rational)) -> ResponseMinumPerBulan
+minumKeResponse (Value a, Value b, Value (Just c)) =
+  ResponseMinumPerBulan a b (fromInteger $ numerator c)
+minumKeResponse (Value a, Value b, Value Nothing) = ResponseMinumPerBulan a b 0
 
 -- | "https://github.com/haskell-servant/servant-auth/pull/107/commits/3813a4d979dfbd47b6f9b667dfe163dd4743c141"
 generateSecret :: MonadRandom m => m ByteString

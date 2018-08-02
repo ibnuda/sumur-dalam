@@ -28,7 +28,7 @@ instance FromJSON RequestMasuk where
   parseJSON = genericParseJSON omitsnake
 
 data RequestCatatAir = RequestCatatAir
-  { reqcatatairSampai       :: Int64
+  { reqcatatairSampai       :: Int
   } deriving (Generic)
 instance FromJSON RequestCatatAir where
   parseJSON = genericParseJSON omitsnake
@@ -87,11 +87,28 @@ data ResponseDataPelanggan = ResponseDataPelanggan
 instance ToJSON ResponseDataPelanggan where
   toJSON = genericToJSON omitsnake
 
+data ResponseMinumPerBulan = ResponseMinumPerBulan
+  { rmbTahun :: Int
+  , rmbBulan :: Int
+  , rmbMinum :: Int
+  } deriving (Generic)
+instance ToJSON ResponseMinumPerBulan where
+  toJSON = genericToJSON omitsnake
+
+-- | Just for shit and giggle, mate.
+instance Num ResponseMinumPerBulan where
+  (+) a b = a {rmbMinum = (rmbMinum a + rmbMinum b)}
+  (*) a b = a {rmbMinum = (rmbMinum a * rmbMinum b)}
+  (-) a b = a {rmbMinum = (rmbMinum a - rmbMinum b)}
+  fromInteger = ResponseMinumPerBulan 0 0 . fromInteger
+  abs a = a {rmbMinum = abs (rmbMinum a)}
+  signum a = a {rmbMinum = 1}
+
 data ResponsePenggunaanAir = ResponsePenggunaanAir
   { resppaNomorMeteran :: Text
   , resppaTahun        :: Integer
   , resppaBulan        :: Int
-  , resppaSampai       :: Int64
+  , resppaSampai       :: Int
   } deriving (Generic)
 instance ToJSON ResponsePenggunaanAir where
   toJSON = genericToJSON omitsnake
@@ -138,22 +155,22 @@ instance ToJSON ResponseDataTagihanPengguna where
 data ResponseDataTagihan = ResponseDataTagihan
   { rdtNomorTagihan  :: Int64
   , rtdNomorMeteran  :: Text
-  , rdtTahun         :: Int64
+  , rdtTahun         :: Int
   , rdtBulan         :: Int
   , rdtPengguna      :: ResponseDataTagihanPengguna
   , rdtTarif         :: ResponseDataTagihanTarif
-  , rdtMinumLalu     :: Int64
-  , rdtMinumSekarang :: Int64
+  , rdtMinumLalu     :: Int
+  , rdtMinumSekarang :: Int
   , rdtTanggalBayar  :: Maybe Day
   } deriving (Generic)
 instance ToJSON ResponseDataTagihan where
   toJSON = genericToJSON omitsnake
 
 data ResponseTagihanSimple = ResponseTagihanSimple
-  { rtsTahun         :: Int64
+  { rtsTahun         :: Int
   , rtsBulan         :: Int
-  , rtsMinumLalu     :: Int64
-  , rtsMinumSekarang :: Int64
+  , rtsMinumLalu     :: Int
+  , rtsMinumSekarang :: Int
   , rtsTanggalBayar  :: Maybe Day
   } deriving (Generic)
 instance ToJSON ResponseTagihanSimple where
@@ -195,7 +212,7 @@ data Gagal
   | GagalPenggunaAda Text
   | GagalPenggunaNil Text
   | GagalPenggunaTunaMeteran
-  | GagalTagihanNil Text Int64 Int
+  | GagalTagihanNil Text Int Int
   | GagalTagihanTahunBulanNil Integer Int
   | GagalTakBerwenang Text
   | GagalTambahPelanggan Text Text

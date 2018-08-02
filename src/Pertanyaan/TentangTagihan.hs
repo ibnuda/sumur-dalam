@@ -27,7 +27,7 @@ selectTagihan
      , MonadIO m
      )
   => Text
-  -> Int64
+  -> Int
   -> Int
   -> ReaderT backend m [Entity Tagihan]
 selectTagihan nometeran tahun bulan = do
@@ -56,9 +56,9 @@ selectDaftarTagihanByTahunBulan
      , MonadIO m
      )
   => Maybe Text
-  -> Int64
   -> Int
-  -> Int64
+  -> Int
+  -> Int
   -> Int
   -> ReaderT
        backend
@@ -68,7 +68,7 @@ selectDaftarTagihanByTahunBulan
          , Entity Tagihan
          , Entity Minum
          , Entity Tarif
-         , Value Int64
+         , Value Int
          )
        ]
 selectDaftarTagihanByTahunBulan mnometeran tini bini tlalu blalu = do

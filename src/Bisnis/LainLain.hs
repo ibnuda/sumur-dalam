@@ -15,6 +15,7 @@ import           Bisnis.Otoritas
 import           Bisnis.ValidasiData
 
 import           Pertanyaan.TentangSistem
+import           Pertanyaan.TentangMinum
 
 lihatTarifTerbaru
   :: (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)
@@ -69,3 +70,11 @@ lihatIkhtisar a = do
     ([Value pelanggan], [Value lunas], [Value belum], [tarif]) ->
       return (pelanggan, lunas, belum, entityVal tarif)
     _ -> throwError $ GagalDB "Lihat Ikhtisar" "Data tidak lengkap."
+
+lihatRiwayatMinum
+  :: (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)
+  => Pengguna
+  -> m [(Value Int, Value Int, Value (Maybe Rational))]
+lihatRiwayatMinum a = do
+  _ <- kewenanganMinimalPengguna a Admin
+  runDb selectSemuaMinum

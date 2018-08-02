@@ -47,9 +47,9 @@ share
     Minum
       meteranId MeteranId
       petugasId PenggunaId
-      tahun Int64
+      tahun Int
       bulan Int
-      sampai Int64
+      sampai Int
       UniqueMeteranTahunBulan meteranId tahun bulan
       deriving Generic
     Tarif

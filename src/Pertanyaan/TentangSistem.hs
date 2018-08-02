@@ -65,7 +65,7 @@ selectTagihanLunas
      , BackendCompatible SqlBackend backend
      , MonadIO m
      )
-  => Int64
+  => Int
   -> Int
   -> Bool
   -> ReaderT backend m [Value Int64]

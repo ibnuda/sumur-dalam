@@ -188,7 +188,7 @@ tahunBulanLalu t b = do
 tagihanAda
   :: (MonadError Gagal m, MonadReader Konfigurasi m, MonadIO m)
   => Text
-  -> Int64
+  -> Int
   -> Int
   -> m (Entity Tagihan)
 tagihanAda nometeran tahun bulan = do

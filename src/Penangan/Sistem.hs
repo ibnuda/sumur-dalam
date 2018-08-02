@@ -79,3 +79,12 @@ putGantiPassword (Authenticated pengguna) RequestGantiPassword {..} =
     (fromSqlKey penggunaGrupId)
     token
 putGantiPassword _ _ = throwError $ GagalTakBerwenang "Ganti password."
+
+getRiwayatMinum
+  :: MonadIO m
+  => AuthResult Pengguna
+  -> PenanganT m [ResponseMinumPerBulan]
+getRiwayatMinum (Authenticated admin) =
+  semuaminumKeResponse <$> lihatRiwayatMinum admin
+getRiwayatMinum _ =
+  throwError $ GagalTakBerwenang "Dilarang lihat penggunaan air."

@@ -25,7 +25,8 @@ type AdministrasiApi =
   :<|> "gantipass"
     :> ReqBody '[ JSON] RequestGantiPassword
     :> Put '[ JSON] ResponseDataPelangganToken
-
+  :<|> "minum"
+    :> Get '[ JSON] [ResponseMinumPerBulan]
 
 administrasiProxy :: Proxy AdministrasiApi
 administrasiProxy = Proxy
@@ -37,6 +38,7 @@ administrasiApi a =
     :<|> postTambahTarifPenangan a
     :<|> postTambahPelangganPenangan a
     :<|> putGantiPassword a
+    :<|> getRiwayatMinum a
 
 administrasiServer
   :: Konfigurasi -> AuthResult Pengguna -> Server AdministrasiApi

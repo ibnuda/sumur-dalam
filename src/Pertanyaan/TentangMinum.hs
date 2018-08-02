@@ -6,6 +6,7 @@ module Pertanyaan.TentangMinum where
 import           Protolude          hiding (from, (<&>), on, isNothing)
 
 import           Database.Esqueleto
+import           Database.Esqueleto.PostgreSQL
 
 import           Model
 
@@ -30,6 +31,21 @@ selectMinumByNomorMeteran nometeran mtahun mbulan = do
     whereOpsional_ minum MinumBulan mbulan
     return (meteran, minum)
 
+-- | Lihat daftar penggunaan air oleh semua orang.
+selectSemuaMinum
+  :: ( PersistUniqueRead backend
+     , PersistQueryRead backend
+     , BackendCompatible SqlBackend backend
+     , MonadIO m
+     )
+  => ReaderT backend m [(Value Int, Value Int, Value (Maybe Rational))]
+selectSemuaMinum = do
+  select $ from $ \minum -> do
+    groupBy $ minum ^. MinumTahun
+    groupBy $ minum ^. MinumBulan
+    orderBy [ desc (minum ^. MinumTahun), desc (minum ^. MinumBulan) ]
+    return (minum ^. MinumTahun, minum ^. MinumBulan, sum_ (minum ^. MinumSampai))
+
 -- | Memasukkan data ke database berdasarkan parameter.
 insertMinum
   :: ( BaseBackend backend ~ SqlBackend
@@ -39,9 +55,9 @@ insertMinum
      )
   => Key Meteran -- ^ Primary key meteran.
   -> Text -- ^ Nomor telepon petugas.
-  -> Int64 -- ^ Tahun pencatatan.
+  -> Int -- ^ Tahun pencatatan.
   -> Int -- ^ Bulan pencatatan.
-  -> Int64 -- ^ Penggunaan air pada saat itu.
+  -> Int -- ^ Penggunaan air pada saat itu.
   -> ReaderT backend m (Entity Minum)
 insertMinum meteranid nomorpetugas tahun bulan sampai = do
   Just (Entity pid _) <- getBy $ UniqueNomorTelp nomorpetugas
@@ -53,7 +69,7 @@ updateMinum
   => Key Meteran -- ^ Primary key meteran.
   -> Integer -- ^ Tahun pencatatan.
   -> Int -- ^ Bulan pencatatan.
-  -> Int64 -- ^ Penggunaan air saat itu.
+  -> Int -- ^ Penggunaan air saat itu.
   -> Maybe (Key Pengguna) -- ^ Petugas pencatat, opsional.
   -> ReaderT SqlBackend m ()
 updateMinum meteranid tahun bulan sampai mnomorpetugas = do

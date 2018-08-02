@@ -35,7 +35,7 @@ lihatDaftarTagihan
          , Entity Tagihan
          , Entity Minum
          , Entity Tarif
-         , Value Int64
+         , Value Int
          )
        ]
 lihatDaftarTagihan admin mtahun mbulan = do
@@ -67,7 +67,7 @@ bayarTagihan
        , Entity Tagihan
        , Entity Minum
        , Entity Tarif
-       , Value Int64
+       , Value Int
        )
 bayarTagihan admin nometeran tahun bulan = do
   _              <- kewenanganMinimalPengguna admin Admin
@@ -108,7 +108,7 @@ lihatTagihanPengguna
        , Entity Tagihan
        , Entity Minum
        , Entity Tarif
-       , Value Int64
+       , Value Int
        )
 lihatTagihanPengguna admin nometeran tahun bulan = do
   _              <- kewenanganMinimalPengguna admin Admin

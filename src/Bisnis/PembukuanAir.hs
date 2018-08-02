@@ -30,8 +30,8 @@ catatAirBulanIni
   :: (MonadReader Konfigurasi m, MonadError Gagal m, MonadIO m)
   => Pengguna -- ^ Pencatat.
   -> Text -- ^ Nomor meteran.
-  -> Int64 -- ^ Sampai.
-  -> m (Integer, Int, Int64)
+  -> Int -- ^ Sampai.
+  -> m (Integer, Int, Int)
 catatAirBulanIni petugas nomormeteran sampai = do
   Pengguna {..}     <- kewenanganMinimalPengguna petugas Petugas
   (tahun, bulan, _) <- toGregorian . utctDay <$> liftIO getCurrentTime
@@ -53,8 +53,8 @@ ubahCatatanAirBulanIni
   :: (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)
   => Pengguna -- ^ Pencatat.
   -> Text -- ^ Nomor meteran.
-  -> Int64 -- ^ Sampai.
-  -> m (Integer, Int, Int64)
+  -> Int -- ^ Sampai.
+  -> m (Integer, Int, Int)
 ubahCatatanAirBulanIni petugas nomormeteran sampai = do
   Pengguna {..}       <- kewenanganMinimalPengguna petugas Petugas
   (tahun, bulan, _)   <- toGregorian . utctDay <$> liftIO getCurrentTime
@@ -67,7 +67,7 @@ lihatCatatanAirPelangganBulanIni
   :: (MonadIO m, MonadReader Konfigurasi m, MonadError Gagal m)
   => Pengguna
   -> Text
-  -> m (Text, Integer, Int, Int64)
+  -> m (Text, Integer, Int, Int)
 lihatCatatanAirPelangganBulanIni petugas nomormeteran = do
   Pengguna {..}            <- kewenanganMinimalPengguna petugas Petugas
   (tahun, bulan, _)        <- toGregorian . utctDay <$> liftIO getCurrentTime

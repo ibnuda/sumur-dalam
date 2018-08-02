@@ -31,9 +31,9 @@ updateHarusIsi _   acc (Just x) = acc =. val x
 minumDiTahunBulan
   :: From query SqlExpr backend (SqlExpr (Entity Minum))
   => SqlExpr (Value (Key Meteran))
-  -> SqlExpr (Value Int64)
   -> SqlExpr (Value Int)
-  -> SqlExpr (Value Int64)
+  -> SqlExpr (Value Int)
+  -> SqlExpr (Value Int)
 minumDiTahunBulan meteranid tahun bulan = case_
   [ when_
       (exists $ from $ \minum -> do
